@@ -4,20 +4,20 @@
  * ============================
  */
 
-// Constantes para almacenamiento local
-const SELECTED_PROFILES_KEY = 'selectedProfiles';
-const FAVORITE_PROFILES_KEY = 'favoriteProfiles';
+// Constantes para almacenamiento local (adaptadas a equipos)
+const SELECTED_EQUIPOS_KEY = 'selectedEquipos';
+const FAVORITE_EQUIPOS_KEY = 'favoriteEquipos';
 
-// Variables globales
-let profilesData = [];
-let profilesPerPage = 3;
+// Variables globales para equipos
+let equiposData = [];
+let equiposPerPage = 3;
 let currentPage = 1;
-let currentFilteredProfiles = [];
+let currentFilteredEquipos = [];
 let renderTimeoutId = null;
 
-// Conjuntos para almacenar IDs
-const selectedProfileIds = new Set(JSON.parse(localStorage.getItem(SELECTED_PROFILES_KEY)) || []);
-const favoriteProfileIds = new Set(JSON.parse(localStorage.getItem(FAVORITE_PROFILES_KEY)) || []);
+// Conjuntos para almacenar IDs seleccionados y favoritos
+const selectedEquipoIds = new Set(JSON.parse(localStorage.getItem(SELECTED_EQUIPOS_KEY)) || []);
+const favoriteEquipoIds = new Set(JSON.parse(localStorage.getItem(FAVORITE_EQUIPOS_KEY)) || []);
 
 /**
  * ============================
@@ -25,28 +25,28 @@ const favoriteProfileIds = new Set(JSON.parse(localStorage.getItem(FAVORITE_PROF
  * ============================
  */
 
-// Cargar perfiles desde localStorage o usar datos por defecto
-const storedProfiles = localStorage.getItem('profilesData');
-console.log('Perfiles almacenados:', storedProfiles);
+// Cargar equipos desde localStorage o usar datos por defecto
+const storedEquipos = localStorage.getItem('equiposData');
+console.log('Equipos almacenados:', storedEquipos);
 
-if (storedProfiles) {
-    profilesData = JSON.parse(storedProfiles);
-    console.log('Perfiles cargados:', profilesData);
+if (storedEquipos) {
+    equiposData = JSON.parse(storedEquipos);
+    console.log('Equipos cargados:', equiposData);
 } else {
-    console.log('No hay perfiles almacenados');
-    // Agregar perfiles por defecto si no hay ninguno
-    profilesData = [
+    console.log('No hay equipos almacenados');
+    // Equipo de ejemplo por defecto
+    equiposData = [
         {
-            name: "Perfil de Ejemplo",
-            title: "Desarrollador Web",
-            image: "https://via.placeholder.com/150",
-            bio: "Este es un perfil de ejemplo para mostrar cuando no hay perfiles guardados.",
-            twitter: "https://twitter.com",
-            linkedin: "https://linkedin.com"
+            nombre: "Bomba de Infusión",
+            marca: "Medtronic",
+            modelo: "InfuStar 3000",
+            numserie: "SN123456",
+            foto: "https://via.placeholder.com/150",
+            descripcion: "Equipo de infusión volumétrica para uso hospitalario."
         }
     ];
-    // Guardar el perfil de ejemplo en localStorage
-    localStorage.setItem('profilesData', JSON.stringify(profilesData));
+    // Guardar el equipo de ejemplo en localStorage
+    localStorage.setItem('equiposData', JSON.stringify(equiposData));
 }
 
 /**
@@ -55,16 +55,17 @@ if (storedProfiles) {
  * ============================
  */
 
-const profilesContainer = document.getElementById('profiles-container');
+// Selección de elementos del DOM adaptados a equipos
+const equiposContainer = document.getElementById('equipos-container');
 const searchInput = document.getElementById('search-input');
 const noResultsMessage = document.getElementById('no-results-message');
-const selectedProfilesCountDisplay = document.getElementById('selected-profiles-count');
+const selectedEquiposCountDisplay = document.getElementById('selected-equipos-count');
 const loadingMessage = document.getElementById('loading-message');
-const profilesPerPageSelect = document.getElementById('profiles-per-page');
+const equiposPerPageSelect = document.getElementById('equipos-per-page');
 const prevPageButton = document.getElementById('prev-page');
 const nextPageButton = document.getElementById('next-page');
 const pageNumbersContainer = document.getElementById('page-numbers');
-const addProfileForm = document.getElementById('add-profile-form');
+const addEquipoForm = document.getElementById('add-equipo-form');
 const clearSearchBtn = document.getElementById('clear-search');
 const exportCsvBtn = document.getElementById('export-csv-btn');
 const searchIcon = document.querySelector('.search-icon');
@@ -73,7 +74,7 @@ const showFavoritesOnlyCheckbox = document.getElementById('show-favorites-only')
 // Elementos del formulario
 const toggleFormBtn = document.getElementById('toggle-add-form');
 const closeFormBtn = document.getElementById('close-add-form');
-const addProfileContainer = document.querySelector('.add-profile-container');
+const addEquipoContainer = document.querySelector('.add-equipo-container');
 
 /**
  * ============================
@@ -81,10 +82,12 @@ const addProfileContainer = document.querySelector('.add-profile-container');
  * ============================
  */
 
-function getTotalPages(profiles = profilesData) {
-    return Math.ceil(profiles.length / profilesPerPage);
+// Calcula el número total de páginas según la cantidad de equipos y equipos por página
+function getTotalPages(equipos = equiposData) {
+    return Math.ceil(equipos.length / equiposPerPage);
 }
 
+// Crea un botón para cada número de página
 function createPageNumberButton(pageNumber) {
     const button = document.createElement('button');
     button.textContent = pageNumber;
@@ -94,22 +97,24 @@ function createPageNumberButton(pageNumber) {
     }
     button.addEventListener('click', () => {
         currentPage = pageNumber;
-        displayProfiles();
+        displayEquipos();
     });
     return button;
 }
 
-function renderPageNumberButtons(profiles = profilesData) {
+// Renderiza los botones de paginación
+function renderPageNumberButtons(equipos = equiposData) {
     pageNumbersContainer.innerHTML = '';
-    const totalPages = getTotalPages(profiles);
+    const totalPages = getTotalPages(equipos);
     for (let i = 1; i <= totalPages; i++) {
         const button = createPageNumberButton(i);
         pageNumbersContainer.appendChild(button);
     }
 }
 
-function updatePaginationUI(profiles = profilesData) {
-    const totalPages = getTotalPages(profiles);
+// Actualiza el estado de los botones de paginación
+function updatePaginationUI(equipos = equiposData) {
+    const totalPages = getTotalPages(equipos);
     const pageNumberButtons = document.querySelectorAll('.page-number-button');
     pageNumberButtons.forEach(button => {
         button.classList.remove('active');
@@ -127,26 +132,23 @@ function updatePaginationUI(profiles = profilesData) {
  * ============================
  */
 
-function renderProfileCards(profilesToRender) {
-    console.log('Renderizando tarjetas:', profilesToRender);
-    
+// Renderiza las tarjetas de equipos en la página actual
+function renderEquipoCards(equiposToRender) {
     if (renderTimeoutId) clearTimeout(renderTimeoutId);
-    profilesContainer.innerHTML = '';
+    equiposContainer.innerHTML = '';
     loadingMessage.classList.remove('hidden');
-    
+
     renderTimeoutId = setTimeout(() => {
-        if (profilesToRender.length === 0) {
-            console.log('No hay perfiles para mostrar');
+        if (equiposToRender.length === 0) {
             noResultsMessage.classList.remove('hidden');
         } else {
             noResultsMessage.classList.add('hidden');
-            profilesToRender.forEach(profile => {
-                console.log('Creando tarjeta para:', profile.name);
-                const newCard = createProfileCard(profile);
-                newCard.classList.add('profile-card--enter');
-                profilesContainer.appendChild(newCard);
+            equiposToRender.forEach(equipo => {
+                const newCard = createEquipoCard(equipo);
+                newCard.classList.add('equipo-card--enter');
+                equiposContainer.appendChild(newCard);
                 setTimeout(() => {
-                    newCard.classList.remove('profile-card--enter');
+                    newCard.classList.remove('equipo-card--enter');
                 }, 10);
             });
         }
@@ -156,48 +158,52 @@ function renderProfileCards(profilesToRender) {
     }, 100);
 }
 
+// Resalta el texto buscado en los campos de la tarjeta
 function highlightText(text, searchTerm) {
-    if (!searchTerm || !text) {
-        return text;
-    }
+    if (!searchTerm || !text) return text;
     const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
     return text.replace(regex, '<mark class="highlight">$1</mark>');
 }
 
-function createProfileCard(profile) {
+// Crea la estructura HTML de una tarjeta de equipo biomédico
+function createEquipoCard(equipo) {
     const card = document.createElement('div');
-    card.classList.add('profile-card');
-    card.dataset.profileName = profile.name;
+    card.classList.add('equipo-card');
+    card.dataset.equipoNombre = equipo.nombre;
 
-    if (selectedProfileIds.has(profile.name)) {
+    if (selectedEquipoIds.has(equipo.nombre)) {
         card.classList.add('selected');
     }
 
     const searchTerm = searchInput.value.trim().toLowerCase();
 
-    // Agregar contenido de la tarjeta
+    // Estructura de la tarjeta: imagen, nombre, marca-modelo-numserie en una línea, descripción y botones
     card.innerHTML = `
         <button class="favorite-btn" title="Marcar como favorito">
-            ${favoriteProfileIds.has(profile.name) ? '★' : '☆'}
+            ${favoriteEquipoIds.has(equipo.nombre) ? '★' : '☆'}
         </button>
-        <img class="profile-image" src="${profile.image}" alt="Foto de perfil de ${profile.name}">
-        <h2 class="profile-name">${highlightText(profile.name, searchTerm)}</h2>
-        <h3 class="profile-title">${highlightText(profile.title, searchTerm)}</h3>
-        <p class="profile-bio">${highlightText(profile.bio, searchTerm)}</p>
-        <div class="profile-social">
-            ${profile.twitter ? `<a href="${profile.twitter}" target="_blank" rel="noopener noreferrer">Twitter</a>` : ''}
-            ${profile.linkedin ? `<a href="${profile.linkedin}" target="_blank" rel="noopener noreferrer">LinkedIn</a>` : ''}
+        <img class="equipo-image" src="${equipo.foto}" alt="Foto de equipo ${equipo.nombre}">
+        <h2 class="equipo-nombre">${highlightText(equipo.nombre, searchTerm)}</h2>
+        <div class="equipo-info-line">
+            <span class="equipo-marca-modelo-numserie">
+                ${highlightText(equipo.marca, searchTerm)} | 
+                ${highlightText(equipo.modelo, searchTerm)} | 
+                ${highlightText(equipo.numserie, searchTerm)}
+            </span>
         </div>
-        <button class="profile-button">Contactar</button>
-        <button class="detail-profile-btn">Ver más</button>
-        <div class="profile-actions">
-            <button class="edit-profile-btn">Editar</button>
-            <button class="delete-profile-btn">Eliminar</button>
+        <p class="equipo-descripcion">${highlightText(equipo.descripcion, searchTerm)}</p>
+        <div class="equipo-acciones">
+            <button class="equipo-button">Contactar</button>
+            <button class="detail-equipo-btn">Ver más</button>
+            <div class="equipo-actions">
+                <button class="edit-equipo-btn">Editar</button>
+                <button class="delete-equipo-btn">Eliminar</button>
+            </div>
         </div>
     `;
 
-    // Eventos de la tarjeta
-    setupCardEventListeners(card, profile);
+    // Asigna los eventos a la tarjeta y sus botones
+    setupCardEventListeners(card, equipo);
 
     return card;
 }
@@ -208,55 +214,55 @@ function createProfileCard(profile) {
  * ============================
  */
 
-function displayProfiles() {
-    console.log('Ejecutando displayProfiles');
-    console.log('Estado actual de profilesData:', profilesData);
+function displayEquipos() {
+    console.log('Ejecutando displayEquipos');
+    console.log('Estado actual de equiposData:', equiposData);
     
     const searchTerm = searchInput.value.trim().toLowerCase();
-    let profilesToShow = [];
+    let equiposToShow = [];
 
     // Filtrar favoritos si está activado
-    let baseProfiles = profilesData;
+    let baseEquipos = equiposData;
     if (showFavoritesOnlyCheckbox && showFavoritesOnlyCheckbox.checked) {
-        baseProfiles = profilesData.filter(p => favoriteProfileIds.has(p.name));
+        baseEquipos = equiposData.filter(e => favoriteEquipoIds.has(e.nombre));
     }
 
-    // Si hay término de búsqueda, filtrar perfiles
+    // Si hay término de búsqueda, filtrar equipos
     if (searchTerm) {
-        currentFilteredProfiles = baseProfiles.filter(profile => {
-            const nameLower = profile.name.toLowerCase();
-            const titleLower = profile.title.toLowerCase();
-            const bioLower = profile.bio.toLowerCase();
-            return nameLower.includes(searchTerm) || 
-                   titleLower.includes(searchTerm) || 
-                   bioLower.includes(searchTerm);
+        currentFilteredEquipos = baseEquipos.filter(equipo => {
+            const nombreLower = equipo.nombre.toLowerCase();
+            const marcaLower = equipo.marca.toLowerCase();
+            const descripcionLower = equipo.descripcion.toLowerCase();
+            return nombreLower.includes(searchTerm) || 
+                   marcaLower.includes(searchTerm) || 
+                   descripcionLower.includes(searchTerm);
         });
     } else {
-        currentFilteredProfiles = baseProfiles;
+        currentFilteredEquipos = baseEquipos;
     }
 
     // Aplicar paginación
-    const startIndex = (currentPage - 1) * profilesPerPage;
-    const endIndex = startIndex + profilesPerPage;
-    profilesToShow = currentFilteredProfiles.slice(startIndex, endIndex);
+    const startIndex = (currentPage - 1) * equiposPerPage;
+    const endIndex = startIndex + equiposPerPage;
+    equiposToShow = currentFilteredEquipos.slice(startIndex, endIndex);
 
-    console.log('Perfiles a mostrar:', profilesToShow);
+    console.log('Equipos a mostrar:', equiposToShow);
     console.log('Página actual:', currentPage);
-    console.log('Perfiles por página:', profilesPerPage);
+    console.log('Equipos por página:', equiposPerPage);
     
-    renderProfileCards(profilesToShow);
-    updateProfilesCount();
+    renderEquipoCards(equiposToShow);
+    updateEquiposCount();
     updatePaginationVisibility(true);
 }
 
-function updateProfilesCount() {
-    const countDiv = document.getElementById('profiles-count');
-    countDiv.textContent = `Total de perfiles: ${profilesData.length}`;
+function updateEquiposCount() {
+    const countDiv = document.getElementById('equipos-count');
+    countDiv.textContent = `Total de equipos: ${equiposData.length}`;
 }
 
 function handleSearch() {
     currentPage = 1;
-    displayProfiles();
+    displayEquipos();
 }
 
 function updatePaginationVisibility(paginated) {
@@ -274,11 +280,11 @@ function updatePaginationVisibility(paginated) {
 
         // Actualizar botones según si hay búsqueda o no
         if (searchTerm) {
-            renderPageNumberButtons(currentFilteredProfiles);
-            updatePaginationUI(currentFilteredProfiles);
+            renderPageNumberButtons(currentFilteredEquipos);
+            updatePaginationUI(currentFilteredEquipos);
         } else {
             // Solo actualizar estado de botones anterior/siguiente
-            const totalPages = getTotalPages(profilesData);
+            const totalPages = getTotalPages(equiposData);
             prevPageButton.disabled = currentPage === 1;
             nextPageButton.disabled = currentPage === totalPages;
         }
@@ -286,9 +292,9 @@ function updatePaginationVisibility(paginated) {
 }
 
 function updateGlobalActionsVisibility() {
-    const globalActionsContainer = document.getElementById('global-profile-actions');
+    const globalActionsContainer = document.getElementById('global-equipo-actions');
     if (globalActionsContainer) {
-        if (selectedProfileIds.size > 0) {
+        if (selectedEquipoIds.size > 0) {
             globalActionsContainer.classList.remove('hidden');
         } else {
             globalActionsContainer.classList.add('hidden');
@@ -302,50 +308,50 @@ function updateGlobalActionsVisibility() {
  * ============================
  */
 
-function saveSelectedProfiles() {
-    localStorage.setItem(SELECTED_PROFILES_KEY, JSON.stringify(Array.from(selectedProfileIds)));
+function saveSelectedEquipos() {
+    localStorage.setItem(SELECTED_EQUIPOS_KEY, JSON.stringify(Array.from(selectedEquipoIds)));
 }
 
-function saveProfilesToLocalStorage() {
-    localStorage.setItem('profilesData', JSON.stringify(profilesData));
+function saveEquiposToLocalStorage() {
+    localStorage.setItem('equiposData', JSON.stringify(equiposData));
 }
 
 function updateSelectedCount() {
-    selectedProfilesCountDisplay.classList.add('pulsing');
-    selectedProfilesCountDisplay.textContent = `Perfiles seleccionados: ${selectedProfileIds.size}`;
+    selectedEquiposCountDisplay.classList.add('pulsing');
+    selectedEquiposCountDisplay.textContent = `Equipos seleccionados: ${selectedEquipoIds.size}`;
     setTimeout(() => {
-        selectedProfilesCountDisplay.classList.remove('pulsing');
+        selectedEquiposCountDisplay.classList.remove('pulsing');
     }, 300);
     updateGlobalActionsVisibility();
 }
 
-function cleanSelectedProfiles() {
-    const validNames = new Set(profilesData.map(p => p.name));
-    for (const name of selectedProfileIds) {
+function cleanSelectedEquipos() {
+    const validNames = new Set(equiposData.map(e => e.nombre));
+    for (const name of selectedEquipoIds) {
         if (!validNames.has(name)) {
-            selectedProfileIds.delete(name);
+            selectedEquipoIds.delete(name);
         }
     }
-    saveSelectedProfiles();
+    saveSelectedEquipos();
 }
 
-function saveFavoriteProfiles() {
-    localStorage.setItem(FAVORITE_PROFILES_KEY, JSON.stringify(Array.from(favoriteProfileIds)));
+function saveFavoriteEquipos() {
+    localStorage.setItem(FAVORITE_EQUIPOS_KEY, JSON.stringify(Array.from(favoriteEquipoIds)));
 }
 
-function exportSelectedProfilesToCSV() {
-    const selectedProfiles = profilesData.filter(profile => selectedProfileIds.has(profile.name));
-    if (!selectedProfiles.length) {
-        showToast("No hay perfiles seleccionados para exportar.", "error");
+function exportSelectedEquiposToCSV() {
+    const selectedEquipos = equiposData.filter(equipo => selectedEquipoIds.has(equipo.nombre));
+    if (!selectedEquipos.length) {
+        showToast("No hay equipos seleccionados para exportar.", "error");
         return;
     }
 
-    const headers = ["name", "title", "image", "bio", "twitter", "linkedin"];
+    const headers = ["nombre", "marca", "modelo", "numserie", "foto", "descripcion"];
     const csvRows = [headers.join(",")];
 
-    selectedProfiles.forEach(profile => {
+    selectedEquipos.forEach(equipo => {
         const row = headers.map(key => {
-            let value = profile[key] || "";
+            let value = equipo[key] || "";
             value = String(value).replace(/"/g, '""');
             if (value.includes(",") || value.includes('"') || value.includes('\n')) {
                 value = `"${value}"`;
@@ -361,7 +367,7 @@ function exportSelectedProfilesToCSV() {
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = "perfiles_seleccionados.csv";
+    a.download = "equipos_seleccionados.csv";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -383,12 +389,12 @@ if (importBtn && importFileInput) {
 
         const reader = new FileReader();
         reader.onload = function(event) {
-            let importedProfiles = [];
+            let importedEquipos = [];
             try {
                 if (file.name.endsWith('.json')) {
-                    importedProfiles = JSON.parse(event.target.result);
+                    importedEquipos = JSON.parse(event.target.result);
                 } else if (file.name.endsWith('.csv')) {
-                    importedProfiles = parseCSVProfiles(event.target.result);
+                    importedEquipos = parseCSVEquipos(event.target.result);
                 } else {
                     showToast("Formato de archivo no soportado.", "error");
                     return;
@@ -399,22 +405,22 @@ if (importBtn && importFileInput) {
             }
 
             let addedCount = 0;
-            importedProfiles.forEach(profile => {
+            importedEquipos.forEach(equipo => {
                 if (
-                    profile.name &&
-                    !profilesData.some(p => p.name === profile.name)
+                    equipo.nombre &&
+                    !equiposData.some(e => e.nombre === equipo.nombre)
                 ) {
-                    profilesData.unshift(profile);
+                    equiposData.unshift(equipo);
                     addedCount++;
                 }
             });
 
             if (addedCount > 0) {
-                saveProfilesToLocalStorage();
-                displayProfiles();
-                showToast(`Se importaron ${addedCount} perfiles.`, "success");
+                saveEquiposToLocalStorage();
+                displayEquipos();
+                showToast(`Se importaron ${addedCount} equipos.`, "success");
             } else {
-                showToast("No se importaron perfiles nuevos.", "info");
+                showToast("No se importaron equipos nuevos.", "info");
             }
         };
 
@@ -422,41 +428,41 @@ if (importBtn && importFileInput) {
     });
 }
 
-function parseCSVProfiles(csvText) {
+function parseCSVEquipos(csvText) {
     const lines = csvText.trim().split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
-    const profiles = [];
+    const equipos = [];
 
     for (let i = 1; i < lines.length; i++) {
         const row = lines[i].split(',');
-        const profile = {};
+        const equipo = {};
         headers.forEach((header, idx) => {
-            profile[header] = row[idx] ? row[idx].replace(/^"|"$/g, '').replace(/""/g, '"') : '';
+            equipo[header] = row[idx] ? row[idx].replace(/^"|"$/g, '').replace(/""/g, '"') : '';
         });
-        profiles.push(profile);
+        equipos.push(equipo);
     }
-    return profiles;
+    return equipos;
 }
 
-function showProfileDetailModal(profile) {
-    const modal = document.getElementById('profile-detail-modal');
-    const content = document.getElementById('profile-detail-content');
+function showEquipoDetailModal(equipo) {
+    const modal = document.getElementById('equipo-detail-modal');
+    const content = document.getElementById('equipo-detail-content');
     
     content.innerHTML = `
-        <div class="profile-detail-modal-content">
-            <img src="${profile.image}" alt="Foto de perfil de ${profile.name}" 
+        <div class="equipo-detail-modal-content">
+            <img src="${equipo.foto}" alt="Foto de equipo ${equipo.nombre}" 
                  style="width:150px;height:150px;border-radius:50%;margin-bottom:20px;border:3px solid var(--color-primary);">
-            <h2 style="font-size:24px;margin-bottom:10px;color:var(--color-text);">${profile.name}</h2>
-            <h3 style="font-size:18px;margin-bottom:15px;color:var(--color-profile-title);">${profile.title}</h3>
-            <p style="margin:20px 0;line-height:1.6;color:var(--color-profile-bio);">${profile.bio}</p>
+            <h2 style="font-size:24px;margin-bottom:10px;color:var(--color-text);">${equipo.nombre}</h2>
+            <h3 style="font-size:18px;margin-bottom:15px;color:var(--color-profile-title);">${equipo.marca} ${equipo.modelo}</h3>
+            <p style="margin:20px 0;line-height:1.6;color:var(--color-profile-bio);">${equipo.descripcion}</p>
             <div style="margin-top:20px;">
-                ${profile.twitter ? 
-                    `<a href="${profile.twitter}" target="_blank" rel="noopener noreferrer" 
+                ${equipo.twitter ? 
+                    `<a href="${equipo.twitter}" target="_blank" rel="noopener noreferrer" 
                         style="margin:0 10px;color:var(--color-primary);text-decoration:none;">
                         <i class="fab fa-twitter"></i> Twitter
                     </a>` : ''}
-                ${profile.linkedin ? 
-                    `<a href="${profile.linkedin}" target="_blank" rel="noopener noreferrer" 
+                ${equipo.linkedin ? 
+                    `<a href="${equipo.linkedin}" target="_blank" rel="noopener noreferrer" 
                         style="margin:0 10px;color:var(--color-primary);text-decoration:none;">
                         <i class="fab fa-linkedin"></i> LinkedIn
                     </a>` : ''}
@@ -468,48 +474,62 @@ function showProfileDetailModal(profile) {
 }
 
 document.getElementById('close-detail-modal').addEventListener('click', () => {
-    document.getElementById('profile-detail-modal').classList.add('hidden');
+    document.getElementById('equipo-detail-modal').classList.add('hidden');
 });
 
-if (addProfileForm) {
-    addProfileForm.addEventListener('submit', function(e) {
+// --- MANEJO DEL FORMULARIO DE AGREGAR/EDITAR EQUIPO ---
+
+if (addEquipoForm) {
+    addEquipoForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const name = document.getElementById('new-name').value.trim();
-        const title = document.getElementById('new-title').value.trim();
-        const image = document.getElementById('new-image').value.trim();
-        const bio = document.getElementById('new-bio').value.trim();
-        const twitter = document.getElementById('new-twitter').value.trim();
-        const linkedin = document.getElementById('new-linkedin').value.trim();
+        // Obtén los valores de los campos
+        const nombre = document.getElementById('new-nombre').value.trim();
+        const marca = document.getElementById('new-marca').value.trim();
+        const modelo = document.getElementById('new-modelo').value.trim();
+        const numserie = document.getElementById('new-numserie').value.trim();
+        const foto = document.getElementById('new-foto').value.trim();
+        const descripcion = document.getElementById('new-descripcion').value.trim();
 
-        if (!name || !title || !image || !bio) {
+        // Validación básica
+        if (!nombre || !marca || !modelo || !numserie || !foto || !descripcion) {
             showToast("Por favor, completa todos los campos obligatorios.", "error");
             return;
         }
 
-        const newProfile = {
-            name,
-            title,
-            image,
-            bio,
-            twitter: twitter || null,
-            linkedin: linkedin || null
-        };
+        const newEquipo = { nombre, marca, modelo, numserie, foto, descripcion };
+        const editingIndex = addEquipoForm.dataset.editingIndex;
 
-        const editingIndex = addProfileForm.dataset.editingIndex;
         if (editingIndex && editingIndex !== "-1") {
-            profilesData[editingIndex] = newProfile;
-            delete addProfileForm.dataset.editingIndex;
-            addProfileForm.querySelector('button[type="submit"]').textContent = "Agregar perfil";
-            showToast("Perfil editado correctamente.", "success");
+            // Validar duplicados excluyendo el equipo que se está editando
+            const existe = equiposData.some((e, idx) =>
+                idx != editingIndex &&
+                e.nombre === nombre &&
+                e.numserie === numserie
+            );
+            if (existe) {
+                showToast("Ya existe un equipo con ese nombre y número de serie.", "error");
+                return;
+            }
+            equiposData[editingIndex] = newEquipo;
+            delete addEquipoForm.dataset.editingIndex;
+            addEquipoForm.querySelector('button[type="submit"]').textContent = "Agregar equipo";
+            showToast("Equipo editado correctamente.", "success");
         } else {
-            profilesData.unshift(newProfile);
-            showToast("Perfil agregado correctamente.", "success");
+            // Validar duplicados normalmente
+            const existe = equiposData.some(e => e.nombre === nombre && e.numserie === numserie);
+            if (existe) {
+                showToast("Ya existe un equipo con ese nombre y número de serie.", "error");
+                return;
+            }
+            equiposData.unshift(newEquipo);
+            showToast("Equipo agregado correctamente.", "success");
         }
 
-        saveProfilesToLocalStorage();
-        displayProfiles();
-        addProfileForm.reset();
+        saveEquiposToLocalStorage();
+        displayEquipos();
+        addEquipoForm.reset();
+        addEquipoContainer.classList.add('hidden');
     });
 }
 
@@ -552,32 +572,32 @@ searchIcon.addEventListener('click', () => {
     searchInput.classList.add('active');
     searchInput.focus();
     currentPage = 1;
-    displayProfiles();
+    displayEquipos();
 });
 
 searchInput.addEventListener('input', () => {
     currentPage = 1;
-    displayProfiles();
+    displayEquipos();
 });
 
-profilesPerPageSelect.addEventListener('change', () => {
-    profilesPerPage = parseInt(profilesPerPageSelect.value);
+equiposPerPageSelect.addEventListener('change', () => {
+    equiposPerPage = parseInt(equiposPerPageSelect.value);
     currentPage = 1;
-    displayProfiles();
+    displayEquipos();
 });
 
 prevPageButton.addEventListener('click', () => {
     if (currentPage > 1) {
         currentPage--;
-        displayProfiles();
+        displayEquipos();
     }
 });
 
 nextPageButton.addEventListener('click', () => {
-    const totalPages = getTotalPages(currentFilteredProfiles);
+    const totalPages = getTotalPages(currentFilteredEquipos);
     if (currentPage < totalPages) {
         currentPage++;
-        displayProfiles();
+        displayEquipos();
     }
 });
 
@@ -606,13 +626,103 @@ themeToggleBtn.addEventListener('click', () => {
     localStorage.setItem('theme', newTheme);
 });
 
-// Asegurarnos de que profilesPerPage se inicialice correctamente
+/**
+ * ============================
+ * INICIALIZACIÓN Y EVENTOS GLOBALES
+ * ============================
+ */
+
+// Mostrar/ocultar el formulario al presionar "Agregar Equipo"
+if (toggleFormBtn) {
+    toggleFormBtn.addEventListener('click', toggleAddEquipoForm);
+}
+
+// Cerrar el formulario y limpiar campos al presionar la X
+if (closeFormBtn) {
+    closeFormBtn.addEventListener('click', () => {
+        addEquipoContainer.classList.add('hidden');
+        addEquipoForm.reset();
+        // Resetear el formulario al modo "agregar"
+        if (addEquipoForm.dataset.editingIndex) {
+            delete addEquipoForm.dataset.editingIndex;
+            addEquipoForm.querySelector('button[type="submit"]').textContent = "Agregar equipo";
+        }
+    });
+}
+
+// Filtro de favoritos: mostrar solo favoritos si está activado
+if (showFavoritesOnlyCheckbox) {
+    showFavoritesOnlyCheckbox.addEventListener('change', () => {
+        currentPage = 1;
+        displayEquipos();
+    });
+}
+
+// Limpiar favoritos que ya no existen
+function cleanFavoriteEquipos() {
+    const validNames = new Set(equiposData.map(e => e.nombre));
+    for (const name of favoriteEquipoIds) {
+        if (!validNames.has(name)) {
+            favoriteEquipoIds.delete(name);
+        }
+    }
+    saveFavoriteEquipos();
+}
+
+// Inicialización al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
-    profilesPerPage = parseInt(profilesPerPageSelect.value) || 3;
-    console.log('Inicializando profilesPerPage:', profilesPerPage);
-    displayProfiles();
+    equiposPerPage = parseInt(equiposPerPageSelect.value) || 3;
+    displayEquipos();
     updateGlobalActionsVisibility();
 });
+
+// Permite cerrar el modal de detalles con la tecla ESC
+document.addEventListener('keydown', (e) => {
+    if (e.key === "Escape") {
+        const detailModal = document.getElementById('equipo-detail-modal');
+        if (detailModal && !detailModal.classList.contains('hidden')) {
+            detailModal.classList.add('hidden');
+        }
+        const confirmModal = document.getElementById('confirm-modal');
+        if (confirmModal && !confirmModal.classList.contains('hidden')) {
+            confirmModal.classList.add('hidden');
+        }
+    }
+});
+
+// Limpiar selección de equipos si se eliminan
+function cleanSelectedEquipos() {
+    const validNames = new Set(equiposData.map(e => e.nombre));
+    for (const name of selectedEquipoIds) {
+        if (!validNames.has(name)) {
+            selectedEquipoIds.delete(name);
+        }
+    }
+    saveSelectedEquipos();
+}
+
+// Inicializar el botón de limpiar búsqueda
+if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        currentPage = 1;
+        displayEquipos();
+        clearSearchBtn.style.display = 'none';
+    });
+}
+
+// Mostrar botón de limpiar búsqueda solo si hay texto
+if (searchInput) {
+    searchInput.addEventListener('input', () => {
+        clearSearchBtn.style.display = searchInput.value ? '' : 'none';
+    });
+}
+
+/**
+ * ============================
+ * FIN DEL SCRIPT
+ * ============================
+ */
 
 /**
  * ============================
@@ -620,33 +730,33 @@ document.addEventListener('DOMContentLoaded', () => {
  * ============================
  */
 
-function setupCardEventListeners(card, profile) {
+function setupCardEventListeners(card, equipo) {
     // Evento de selección de tarjeta
     card.addEventListener('click', (event) => {
         const clickedElement = event.target;
         // Evita seleccionar si se hace clic en un botón o enlace
-        if (clickedElement.classList.contains('profile-button') || 
+        if (clickedElement.classList.contains('equipo-button') || 
             clickedElement.closest('a') ||
-            clickedElement.classList.contains('edit-profile-btn') ||
-            clickedElement.classList.contains('delete-profile-btn') ||
+            clickedElement.classList.contains('edit-equipo-btn') ||
+            clickedElement.classList.contains('delete-equipo-btn') ||
             clickedElement.classList.contains('favorite-btn') ||
-            clickedElement.classList.contains('detail-profile-btn')) {
+            clickedElement.classList.contains('detail-equipo-btn')) {
             return;
         }
-        const profileName = card.dataset.profileName;
-        if (selectedProfileIds.has(profileName)) {
-            selectedProfileIds.delete(profileName);
+        const equipoNombre = card.dataset.equipoNombre;
+        if (selectedEquipoIds.has(equipoNombre)) {
+            selectedEquipoIds.delete(equipoNombre);
             card.classList.remove('selected');
         } else {
-            selectedProfileIds.add(profileName);
+            selectedEquipoIds.add(equipoNombre);
             card.classList.add('selected');
         }
         updateSelectedCount();
-        saveSelectedProfiles();
+        saveSelectedEquipos();
     });
 
     // Botón de contactar
-    const contactBtn = card.querySelector('.profile-button');
+    const contactBtn = card.querySelector('.equipo-button');
     if (contactBtn) {
         let contactSent = false;
         contactBtn.addEventListener('click', (event) => {
@@ -663,11 +773,11 @@ function setupCardEventListeners(card, profile) {
     }
 
     // Botón Ver más
-    const detailBtn = card.querySelector('.detail-profile-btn');
+    const detailBtn = card.querySelector('.detail-equipo-btn');
     if (detailBtn) {
         detailBtn.addEventListener('click', (event) => {
             event.stopPropagation();
-            showProfileDetailModal(profile);
+            showEquipoDetailModal(equipo);
         });
     }
 
@@ -676,75 +786,77 @@ function setupCardEventListeners(card, profile) {
     if (favoriteBtn) {
         favoriteBtn.addEventListener('click', (event) => {
             event.stopPropagation();
-            if (favoriteProfileIds.has(profile.name)) {
-                favoriteProfileIds.delete(profile.name);
+            if (favoriteEquipoIds.has(equipo.nombre)) {
+                favoriteEquipoIds.delete(equipo.nombre);
                 favoriteBtn.innerHTML = '☆';
-                showToast(`${profile.name} eliminado de favoritos`, "info");
+                showToast(`${equipo.nombre} eliminado de favoritos`, "info");
             } else {
-                favoriteProfileIds.add(profile.name);
+                favoriteEquipoIds.add(equipo.nombre);
                 favoriteBtn.innerHTML = '★';
-                showToast(`${profile.name} agregado a favoritos`, "success");
+                showToast(`${equipo.nombre} agregado a favoritos`, "success");
             }
-            saveFavoriteProfiles();
+            saveFavoriteEquipos();
             if (showFavoritesOnlyCheckbox && showFavoritesOnlyCheckbox.checked) {
                 currentPage = 1; // Resetear a la primera página
-                displayProfiles();
+                displayEquipos();
             }
         });
     }
 
     // Botón de editar
-    const editBtn = card.querySelector('.edit-profile-btn');
+    const editBtn = card.querySelector('.edit-equipo-btn');
     if (editBtn) {
         editBtn.addEventListener('click', (event) => {
             event.stopPropagation();
-            addProfileContainer.classList.remove('hidden');
-            document.getElementById('new-name').value = profile.name;
-            document.getElementById('new-title').value = profile.title;
-            document.getElementById('new-image').value = profile.image;
-            document.getElementById('new-bio').value = profile.bio;
-            document.getElementById('new-twitter').value = profile.twitter || '';
-            document.getElementById('new-linkedin').value = profile.linkedin || '';
-            
-            const editingIndex = profilesData.findIndex(p => 
-                p.name === profile.name && 
-                p.title === profile.title && 
-                p.bio === profile.bio
+            addEquipoContainer.classList.remove('hidden');
+            document.getElementById('new-nombre').value = equipo.nombre;
+            document.getElementById('new-marca').value = equipo.marca;
+            document.getElementById('new-modelo').value = equipo.modelo;
+            document.getElementById('new-numserie').value = equipo.numserie;
+            document.getElementById('new-foto').value = equipo.foto;
+            document.getElementById('new-descripcion').value = equipo.descripcion;
+
+            // Encuentra el índice del equipo a editar
+            const editingIndex = equiposData.findIndex(e =>
+                e.nombre === equipo.nombre &&
+                e.marca === equipo.marca &&
+                e.modelo === equipo.modelo &&
+                e.numserie === equipo.numserie
             );
-            
-            addProfileForm.dataset.editingIndex = editingIndex;
-            addProfileForm.querySelector('button[type="submit"]').textContent = "Guardar cambios";
-            
+
+            addEquipoForm.dataset.editingIndex = editingIndex;
+            addEquipoForm.querySelector('button[type="submit"]').textContent = "Guardar cambios";
+
             // Scroll hacia el formulario
-            addProfileContainer.scrollIntoView({ behavior: 'smooth' });
+            addEquipoContainer.scrollIntoView({ behavior: 'smooth' });
         });
     }
 
     // Botón de eliminar
-    const deleteBtn = card.querySelector('.delete-profile-btn');
+    const deleteBtn = card.querySelector('.delete-equipo-btn');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', (event) => {
             event.stopPropagation();
-            showConfirmModal(`¿Seguro que deseas eliminar el perfil de ${profile.name}?`, (confirmed) => {
+            showConfirmModal(`¿Seguro que deseas eliminar el equipo ${equipo.nombre}?`, (confirmed) => {
                 if (confirmed) {
-                    const idx = profilesData.findIndex(p => 
-                        p.name === profile.name && 
-                        p.title === profile.title && 
-                        p.bio === profile.bio
+                    const idx = equiposData.findIndex(e => 
+                        e.nombre === equipo.nombre && 
+                        e.marca === equipo.marca && 
+                        e.modelo === equipo.modelo
                     );
                     if (idx !== -1) {
-                        selectedProfileIds.delete(profile.name);
-                        favoriteProfileIds.delete(profile.name);
-                        card.classList.add('profile-card--exit');
+                        selectedEquipoIds.delete(equipo.nombre);
+                        favoriteEquipoIds.delete(equipo.nombre);
+                        card.classList.add('equipo-card--exit');
                         setTimeout(() => {
-                            profilesData.splice(idx, 1);
-                            saveProfilesToLocalStorage();
-                            saveFavoriteProfiles();
-                            showToast(`Perfil de ${profile.name} eliminado correctamente.`, "success");
+                            equiposData.splice(idx, 1);
+                            saveEquiposToLocalStorage();
+                            saveFavoriteEquipos();
+                            showToast(`Equipo ${equipo.nombre} eliminado correctamente.`, "success");
                             currentPage = 1;
-                            displayProfiles();
-                            cleanSelectedProfiles();
-                            cleanFavoriteProfiles();
+                            displayEquipos();
+                            cleanSelectedEquipos();
+                            cleanFavoriteEquipos();
                             updateSelectedCount();
                         }, 300);
                     }
@@ -755,45 +867,10 @@ function setupCardEventListeners(card, profile) {
 }
 
 // Función para mostrar/ocultar el formulario
-function toggleAddProfileForm() {
-    addProfileContainer.classList.toggle('hidden');
-    if (!addProfileContainer.classList.contains('hidden')) {
-        document.getElementById('new-name').focus();
+function toggleAddEquipoForm() {
+    addEquipoContainer.classList.toggle('hidden');
+    if (!addEquipoContainer.classList.contains('hidden')) {
+        document.getElementById('new-nombre').focus();
     }
-}
-
-// Event listeners para el formulario
-if (toggleFormBtn) {
-    toggleFormBtn.addEventListener('click', toggleAddProfileForm);
-}
-
-if (closeFormBtn) {
-    closeFormBtn.addEventListener('click', () => {
-        addProfileContainer.classList.add('hidden');
-        addProfileForm.reset();
-        // Resetear el formulario al modo "agregar"
-        if (addProfileForm.dataset.editingIndex) {
-            delete addProfileForm.dataset.editingIndex;
-            addProfileForm.querySelector('button[type="submit"]').textContent = "Agregar perfil";
-        }
-    });
-}
-
-// Agregar el evento de cambio para el checkbox de favoritos
-if (showFavoritesOnlyCheckbox) {
-    showFavoritesOnlyCheckbox.addEventListener('change', () => {
-        currentPage = 1; // Resetear a la primera página cuando cambia el filtro
-        displayProfiles();
-    });
-}
-
-function cleanFavoriteProfiles() {
-    const validNames = new Set(profilesData.map(p => p.name));
-    for (const name of favoriteProfileIds) {
-        if (!validNames.has(name)) {
-            favoriteProfileIds.delete(name);
-        }
-    }
-    saveFavoriteProfiles();
 }
 

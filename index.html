@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Portafolio de Talentos</title>
+    <title>Biomedic-Go</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Botón de cambio de tema (modo oscuro/claro) -->
-    <button id="theme-toggle" class="theme-toggle-btn" title="Cambiar tema">��</button>
+    <button id="theme-toggle" class="theme-toggle-btn" title="Cambiar tema">🌙</button>
 
     <!-- Título principal -->
     <div class="main-title">
-        <h1>Portafolio de Talentos</h1>
-        <p>Encuentra y gestiona perfiles profesionales</p>
+        <h1>Biomedic-Go</h1>
+        <p>Gestión y búsqueda de equipos biomédicos</p>
     </div>
 
     <!-- Sección de búsqueda y filtros -->
     <div class="search-bar-wrapper">
         <div class="search-container">
-            <input type="text" id="search-input" placeholder="Buscar perfil..." />
+            <input type="text" id="search-input" placeholder="Buscar equipo..." />
             <button id="clear-search" class="clear-search-btn" title="Limpiar búsqueda" style="display:none;">×</button>
         </div>
         <span class="search-icon" tabindex="0">
@@ -33,48 +33,48 @@
     <!-- Configuración de paginación -->
     <div class="pagination-settings">
         Mostrar:
-        <select id="profiles-per-page">
+        <select id="equipos-per-page">
             <option value="3" selected>3</option>
             <option value="5">5</option>
             <option value="10">10</option>
-        </select> perfiles por página
+        </select> equipos por página
     </div>
 
-    <!-- Contenedor Global de Acciones de Perfil -->
-    <div id="global-profile-actions" class="global-actions-container hidden">
+    <!-- Contenedor Global de Acciones de Equipo -->
+    <div id="global-equipo-actions" class="global-actions-container hidden">
         <button id="export-csv-btn" class="action-btn">Exportar CSV</button>
         <button id="toggle-add-form" class="action-btn toggle-form-btn">
-            <span class="plus-icon">+</span> Agregar Perfil
+            <span class="plus-icon">+</span> Agregar Equipo
         </button>
-        <button id="import-btn" class="action-btn">Importar Perfiles</button>
+        <button id="import-btn" class="action-btn">Importar Equipos</button>
         <input type="file" id="import-file-input" accept=".csv, .json" style="display: none;">
     </div>
 
-    <!-- Contenedor para el formulario de agregar perfil (se mantiene donde estaba o se puede mover si es necesario) -->
-    <div class="add-profile-container hidden">
-        <form id="add-profile-form">
+    <!-- Contenedor para el formulario de agregar equipo -->
+    <div class="add-equipo-container hidden">
+        <form id="add-equipo-form">
             <div class="form-header">
-                <h2>Agregar nuevo perfil</h2>
+                <h2>Agregar nuevo equipo</h2>
                 <button type="button" class="close-form-btn" id="close-add-form">×</button>
             </div>
-            <input type="text" id="new-name" placeholder="Nombre completo" required>
-            <input type="text" id="new-title" placeholder="Título u ocupación" required>
-            <input type="url" id="new-image" placeholder="URL de la imagen de perfil" required>
-            <textarea id="new-bio" placeholder="Biografía breve" required></textarea>
-            <input type="url" id="new-twitter" placeholder="URL de Twitter (opcional)">
-            <input type="url" id="new-linkedin" placeholder="URL de LinkedIn (opcional)">
-            <button type="submit">Agregar perfil</button>
+            <input type="text" id="new-nombre" placeholder="Nombre del equipo" required>
+            <input type="text" id="new-marca" placeholder="Marca" required>
+            <input type="text" id="new-modelo" placeholder="Modelo" required>
+            <input type="text" id="new-numserie" placeholder="Número de serie" required>
+            <input type="url" id="new-foto" placeholder="URL de la foto" required>
+            <textarea id="new-descripcion" placeholder="Descripción" required></textarea>
+            <button type="submit">Agregar equipo</button>
         </form>
     </div>
 
-    <!-- Contenedor principal de perfiles -->
-    <div id="profiles-container"></div>
+    <!-- Contenedor principal de equipos -->
+    <div id="equipos-container"></div>
 
     <!-- Mensajes de estado -->
-    <div id="loading-message" class="hidden">Cargando perfiles...</div>
-    <div id="no-results-message" class="hidden">No se encontraron perfiles.</div>
-    <div class="count-display" id="selected-profiles-count">Perfiles seleccionados: 0</div>
-    <div id="profiles-count" class="profiles-count"></div>
+    <div id="loading-message" class="hidden">Cargando equipos...</div>
+    <div id="no-results-message" class="hidden">No se encontraron equipos.</div>
+    <div class="count-display" id="selected-equipos-count">Equipos seleccionados: 0</div>
+    <div id="equipos-count" class="equipos-count"></div>
 
     <!-- Controles de paginación -->
     <div class="pagination-container">
@@ -98,7 +98,7 @@
     <!-- Modal de confirmación -->
     <div id="confirm-modal" class="modal hidden">
         <div class="modal-content">
-            <p id="confirm-modal-message">¿Seguro que deseas eliminar este perfil?</p>
+            <p id="confirm-modal-message">¿Seguro que deseas eliminar este equipo?</p>
             <div class="modal-actions">
                 <button id="confirm-modal-yes" class="modal-btn modal-btn-yes">Sí</button>
                 <button id="confirm-modal-no" class="modal-btn modal-btn-no">No</button>
@@ -106,11 +106,11 @@
         </div>
     </div>
 
-    <!-- Modal de detalles de perfil -->
-    <div id="profile-detail-modal" class="modal hidden">
+    <!-- Modal de detalles de equipo -->
+    <div id="equipo-detail-modal" class="modal hidden">
         <div class="modal-content">
             <button id="close-detail-modal" class="close-modal-btn" title="Cerrar">×</button>
-            <div id="profile-detail-content"></div>
+            <div id="equipo-detail-content"></div>
         </div>
     </div>
 
