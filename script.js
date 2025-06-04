@@ -4,11 +4,11 @@
  * ============================
  */
 
-// Constantes para almacenamiento local (adaptadas a equipos)
+// Claves para almacenamiento local
 const SELECTED_EQUIPOS_KEY = 'selectedEquipos';
 const FAVORITE_EQUIPOS_KEY = 'favoriteEquipos';
 
-// Variables globales para equipos
+// Variables globales
 let equiposData = [];
 let equiposPerPage = 3;
 let currentPage = 1;
@@ -27,14 +27,9 @@ const favoriteEquipoIds = new Set(JSON.parse(localStorage.getItem(FAVORITE_EQUIP
 
 // Cargar equipos desde localStorage o usar datos por defecto
 const storedEquipos = localStorage.getItem('equiposData');
-console.log('Equipos almacenados:', storedEquipos);
-
 if (storedEquipos) {
     equiposData = JSON.parse(storedEquipos);
-    console.log('Equipos cargados:', equiposData);
 } else {
-    console.log('No hay equipos almacenados');
-    // Equipo de ejemplo por defecto
     equiposData = [
         {
             nombre: "Bomba de Infusión",
@@ -45,7 +40,6 @@ if (storedEquipos) {
             descripcion: "Equipo de infusión volumétrica para uso hospitalario."
         }
     ];
-    // Guardar el equipo de ejemplo en localStorage
     localStorage.setItem('equiposData', JSON.stringify(equiposData));
 }
 
@@ -55,7 +49,6 @@ if (storedEquipos) {
  * ============================
  */
 
-// Selección de elementos del DOM adaptados a equipos
 const equiposContainer = document.getElementById('equipos-container');
 const searchInput = document.getElementById('search-input');
 const noResultsMessage = document.getElementById('no-results-message');
@@ -70,8 +63,6 @@ const clearSearchBtn = document.getElementById('clear-search');
 const exportCsvBtn = document.getElementById('export-csv-btn');
 const searchIcon = document.querySelector('.search-icon');
 const showFavoritesOnlyCheckbox = document.getElementById('show-favorites-only');
-
-// Elementos del formulario
 const toggleFormBtn = document.getElementById('toggle-add-form');
 const closeFormBtn = document.getElementById('close-add-form');
 const addEquipoContainer = document.querySelector('.add-equipo-container');
@@ -82,12 +73,10 @@ const addEquipoContainer = document.querySelector('.add-equipo-container');
  * ============================
  */
 
-// Calcula el número total de páginas según la cantidad de equipos y equipos por página
 function getTotalPages(equipos = equiposData) {
     return Math.ceil(equipos.length / equiposPerPage);
 }
 
-// Crea un botón para cada número de página
 function createPageNumberButton(pageNumber) {
     const button = document.createElement('button');
     button.textContent = pageNumber;
@@ -102,7 +91,6 @@ function createPageNumberButton(pageNumber) {
     return button;
 }
 
-// Renderiza los botones de paginación
 function renderPageNumberButtons(equipos = equiposData) {
     pageNumbersContainer.innerHTML = '';
     const totalPages = getTotalPages(equipos);
@@ -112,7 +100,6 @@ function renderPageNumberButtons(equipos = equiposData) {
     }
 }
 
-// Actualiza el estado de los botones de paginación
 function updatePaginationUI(equipos = equiposData) {
     const totalPages = getTotalPages(equipos);
     const pageNumberButtons = document.querySelectorAll('.page-number-button');
@@ -132,7 +119,6 @@ function updatePaginationUI(equipos = equiposData) {
  * ============================
  */
 
-// Renderiza las tarjetas de equipos en la página actual
 function renderEquipoCards(equiposToRender) {
     if (renderTimeoutId) clearTimeout(renderTimeoutId);
     equiposContainer.innerHTML = '';
@@ -145,11 +131,7 @@ function renderEquipoCards(equiposToRender) {
             noResultsMessage.classList.add('hidden');
             equiposToRender.forEach(equipo => {
                 const newCard = createEquipoCard(equipo);
-                newCard.classList.add('equipo-card--enter');
                 equiposContainer.appendChild(newCard);
-                setTimeout(() => {
-                    newCard.classList.remove('equipo-card--enter');
-                }, 10);
             });
         }
         updateSelectedCount();
@@ -193,12 +175,10 @@ function createEquipoCard(equipo) {
         </div>
         <p class="equipo-descripcion">${highlightText(equipo.descripcion, searchTerm)}</p>
         <div class="equipo-acciones">
-            <button class="equipo-button">Contactar</button>
-            <button class="detail-equipo-btn">Ver más</button>
-            <div class="equipo-actions">
-                <button class="edit-equipo-btn">Editar</button>
-                <button class="delete-equipo-btn">Eliminar</button>
-            </div>
+            <button class="equipo-button" title="Contactar"><span aria-label="Contactar" role="img">✉️</span></button>
+            <button class="detail-equipo-btn" title="Ver más"><span aria-label="Ver más" role="img">🔍</span></button>
+            <button class="edit-equipo-btn" title="Editar"><span aria-label="Editar" role="img">✏️</span></button>
+            <button class="delete-equipo-btn" title="Eliminar"><span aria-label="Eliminar" role="img">🗑️</span></button>
         </div>
     `;
 
@@ -215,19 +195,14 @@ function createEquipoCard(equipo) {
  */
 
 function displayEquipos() {
-    console.log('Ejecutando displayEquipos');
-    console.log('Estado actual de equiposData:', equiposData);
-    
     const searchTerm = searchInput.value.trim().toLowerCase();
     let equiposToShow = [];
 
-    // Filtrar favoritos si está activado
     let baseEquipos = equiposData;
     if (showFavoritesOnlyCheckbox && showFavoritesOnlyCheckbox.checked) {
         baseEquipos = equiposData.filter(e => favoriteEquipoIds.has(e.nombre));
     }
 
-    // Si hay término de búsqueda, filtrar equipos
     if (searchTerm) {
         currentFilteredEquipos = baseEquipos.filter(equipo => {
             const nombreLower = equipo.nombre.toLowerCase();
@@ -241,15 +216,10 @@ function displayEquipos() {
         currentFilteredEquipos = baseEquipos;
     }
 
-    // Aplicar paginación
     const startIndex = (currentPage - 1) * equiposPerPage;
     const endIndex = startIndex + equiposPerPage;
     equiposToShow = currentFilteredEquipos.slice(startIndex, endIndex);
 
-    console.log('Equipos a mostrar:', equiposToShow);
-    console.log('Página actual:', currentPage);
-    console.log('Equipos por página:', equiposPerPage);
-    
     renderEquipoCards(equiposToShow);
     updateEquiposCount();
     updatePaginationVisibility(true);
@@ -260,44 +230,23 @@ function updateEquiposCount() {
     countDiv.textContent = `Total de equipos: ${equiposData.length}`;
 }
 
-function handleSearch() {
-    currentPage = 1;
-    displayEquipos();
-}
-
-function updatePaginationVisibility(paginated) {
+function updatePaginationVisibility() {
     const paginationContainer = document.querySelector('.pagination-container');
     const pageNumbers = document.getElementById('page-numbers');
     const searchTerm = searchInput.value.trim();
 
     if (paginationContainer) {
         paginationContainer.style.display = '';
-        
-        // Mostrar/ocultar números de página según si hay búsqueda
         if (pageNumbers) {
             pageNumbers.style.display = searchTerm ? '' : 'none';
         }
-
-        // Actualizar botones según si hay búsqueda o no
         if (searchTerm) {
             renderPageNumberButtons(currentFilteredEquipos);
             updatePaginationUI(currentFilteredEquipos);
         } else {
-            // Solo actualizar estado de botones anterior/siguiente
             const totalPages = getTotalPages(equiposData);
             prevPageButton.disabled = currentPage === 1;
             nextPageButton.disabled = currentPage === totalPages;
-        }
-    }
-}
-
-function updateGlobalActionsVisibility() {
-    const globalActionsContainer = document.getElementById('global-equipo-actions');
-    if (globalActionsContainer) {
-        if (selectedEquipoIds.size > 0) {
-            globalActionsContainer.classList.remove('hidden');
-        } else {
-            globalActionsContainer.classList.add('hidden');
         }
     }
 }
@@ -316,29 +265,28 @@ function saveEquiposToLocalStorage() {
     localStorage.setItem('equiposData', JSON.stringify(equiposData));
 }
 
-function updateSelectedCount() {
-    selectedEquiposCountDisplay.classList.add('pulsing');
-    selectedEquiposCountDisplay.textContent = `Equipos seleccionados: ${selectedEquipoIds.size}`;
-    setTimeout(() => {
-        selectedEquiposCountDisplay.classList.remove('pulsing');
-    }, 300);
-    updateGlobalActionsVisibility();
-}
-
-function cleanSelectedEquipos() {
-    const validNames = new Set(equiposData.map(e => e.nombre));
-    for (const name of selectedEquipoIds) {
-        if (!validNames.has(name)) {
-            selectedEquipoIds.delete(name);
+function updateGlobalActionsVisibility() {
+    const globalActionsContainer = document.getElementById('global-equipo-actions');
+    if (globalActionsContainer) {
+        if (selectedEquipoIds.size > 0) {
+            globalActionsContainer.classList.remove('hidden');
+        } else {
+            globalActionsContainer.classList.add('hidden');
         }
     }
-    saveSelectedEquipos();
+}
+
+// Llama a esta función después de seleccionar/deseleccionar tarjetas:
+function updateSelectedCount() {
+    selectedEquiposCountDisplay.textContent = `Equipos seleccionados: ${selectedEquipoIds.size}`;
+    updateGlobalActionsVisibility();
 }
 
 function saveFavoriteEquipos() {
     localStorage.setItem(FAVORITE_EQUIPOS_KEY, JSON.stringify(Array.from(favoriteEquipoIds)));
 }
 
+// === EXPORTAR SELECCIONADOS A CSV ===
 function exportSelectedEquiposToCSV() {
     const selectedEquipos = equiposData.filter(equipo => selectedEquipoIds.has(equipo.nombre));
     if (!selectedEquipos.length) {
@@ -372,6 +320,23 @@ function exportSelectedEquiposToCSV() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+}
+
+// === IMPORTAR EQUIPOS DESDE ARCHIVO ===
+function parseCSVEquipos(csvText) {
+    const lines = csvText.trim().split('\n');
+    const headers = lines[0].split(',').map(h => h.trim());
+    const equipos = [];
+
+    for (let i = 1; i < lines.length; i++) {
+        const row = lines[i].split(',');
+        const equipo = {};
+        headers.forEach((header, idx) => {
+            equipo[header] = row[idx] ? row[idx].replace(/^"|"$/g, '').replace(/""/g, '"') : '';
+        });
+        equipos.push(equipo);
+    }
+    return equipos;
 }
 
 const importBtn = document.getElementById('import-btn');
@@ -428,62 +393,58 @@ if (importBtn && importFileInput) {
     });
 }
 
-function parseCSVEquipos(csvText) {
-    const lines = csvText.trim().split('\n');
-    const headers = lines[0].split(',').map(h => h.trim());
-    const equipos = [];
-
-    for (let i = 1; i < lines.length; i++) {
-        const row = lines[i].split(',');
-        const equipo = {};
-        headers.forEach((header, idx) => {
-            equipo[header] = row[idx] ? row[idx].replace(/^"|"$/g, '').replace(/""/g, '"') : '';
-        });
-        equipos.push(equipo);
-    }
-    return equipos;
+// === EVENTOS PARA BOTONES DE EXPORTAR ===
+if (exportCsvBtn) {
+    exportCsvBtn.addEventListener('click', exportSelectedEquiposToCSV);
 }
+
+
+/**
+ * ============================
+ * MODAL DE DETALLE DE EQUIPO
+ * ============================
+ */
 
 function showEquipoDetailModal(equipo) {
     const modal = document.getElementById('equipo-detail-modal');
     const content = document.getElementById('equipo-detail-content');
-    
     content.innerHTML = `
+        <button class="close-detail-modal" id="close-detail-modal" title="Cerrar">×</button>
         <div class="equipo-detail-modal-content">
-            <img src="${equipo.foto}" alt="Foto de equipo ${equipo.nombre}" 
-                 style="width:150px;height:150px;border-radius:50%;margin-bottom:20px;border:3px solid var(--color-primary);">
-            <h2 style="font-size:24px;margin-bottom:10px;color:var(--color-text);">${equipo.nombre}</h2>
-            <h3 style="font-size:18px;margin-bottom:15px;color:var(--color-profile-title);">${equipo.marca} ${equipo.modelo}</h3>
-            <p style="margin:20px 0;line-height:1.6;color:var(--color-profile-bio);">${equipo.descripcion}</p>
-            <div style="margin-top:20px;">
-                ${equipo.twitter ? 
-                    `<a href="${equipo.twitter}" target="_blank" rel="noopener noreferrer" 
-                        style="margin:0 10px;color:var(--color-primary);text-decoration:none;">
-                        <i class="fab fa-twitter"></i> Twitter
-                    </a>` : ''}
-                ${equipo.linkedin ? 
-                    `<a href="${equipo.linkedin}" target="_blank" rel="noopener noreferrer" 
-                        style="margin:0 10px;color:var(--color-primary);text-decoration:none;">
-                        <i class="fab fa-linkedin"></i> LinkedIn
-                    </a>` : ''}
-            </div>
+            <img class="equipo-detail-image" src="${equipo.foto}" alt="Foto de equipo ${equipo.nombre}">
+            <h2 class="equipo-detail-nombre">${equipo.nombre}</h2>
+            <h3 class="equipo-detail-marca-modelo">${equipo.marca} ${equipo.modelo}</h3>
+            <p class="equipo-detail-descripcion">${equipo.descripcion}</p>
         </div>
     `;
-    
     modal.classList.remove('hidden');
+
+    // Asignar el evento de cierre después de inyectar el HTML
+    const closeBtn = document.getElementById('close-detail-modal');
+    if (closeBtn) {
+        closeBtn.onclick = () => {
+            modal.classList.add('hidden');
+        };
+    }
 }
 
-document.getElementById('close-detail-modal').addEventListener('click', () => {
-    document.getElementById('equipo-detail-modal').classList.add('hidden');
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('close-detail-modal')) {
+        const modal = document.getElementById('equipo-detail-modal');
+        if (modal) modal.classList.add('hidden');
+    }
 });
 
-// --- MANEJO DEL FORMULARIO DE AGREGAR/EDITAR EQUIPO ---
+/**
+ * ============================
+ * FORMULARIO DE AGREGAR/EDITAR EQUIPO
+ * ============================
+ */
 
 if (addEquipoForm) {
     addEquipoForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        // Obtén los valores de los campos
         const nombre = document.getElementById('new-nombre').value.trim();
         const marca = document.getElementById('new-marca').value.trim();
         const modelo = document.getElementById('new-modelo').value.trim();
@@ -491,7 +452,6 @@ if (addEquipoForm) {
         const foto = document.getElementById('new-foto').value.trim();
         const descripcion = document.getElementById('new-descripcion').value.trim();
 
-        // Validación básica
         if (!nombre || !marca || !modelo || !numserie || !foto || !descripcion) {
             showToast("Por favor, completa todos los campos obligatorios.", "error");
             return;
@@ -501,7 +461,6 @@ if (addEquipoForm) {
         const editingIndex = addEquipoForm.dataset.editingIndex;
 
         if (editingIndex && editingIndex !== "-1") {
-            // Validar duplicados excluyendo el equipo que se está editando
             const existe = equiposData.some((e, idx) =>
                 idx != editingIndex &&
                 e.nombre === nombre &&
@@ -512,11 +471,10 @@ if (addEquipoForm) {
                 return;
             }
             equiposData[editingIndex] = newEquipo;
-            delete addEquipoForm.dataset.editingIndex;
+            delete addEquipoForm.dataset.editandoIndex;
             addEquipoForm.querySelector('button[type="submit"]').textContent = "Agregar equipo";
             showToast("Equipo editado correctamente.", "success");
         } else {
-            // Validar duplicados normalmente
             const existe = equiposData.some(e => e.nombre === nombre && e.numserie === numserie);
             if (existe) {
                 showToast("Ya existe un equipo con ese nombre y número de serie.", "error");
@@ -532,6 +490,12 @@ if (addEquipoForm) {
         addEquipoContainer.classList.add('hidden');
     });
 }
+
+/**
+ * ============================
+ * TOAST Y CONFIRMACIÓN
+ * ============================
+ */
 
 function showToast(message, type = "info") {
     const toastContainer = document.getElementById('toast-container');
@@ -567,6 +531,12 @@ function showConfirmModal(message, onConfirm) {
         onConfirm(false);
     };
 }
+
+/**
+ * ============================
+ * EVENTOS DE INTERFAZ Y TEMA
+ * ============================
+ */
 
 searchIcon.addEventListener('click', () => {
     searchInput.classList.add('active');
@@ -632,17 +602,14 @@ themeToggleBtn.addEventListener('click', () => {
  * ============================
  */
 
-// Mostrar/ocultar el formulario al presionar "Agregar Equipo"
 if (toggleFormBtn) {
     toggleFormBtn.addEventListener('click', toggleAddEquipoForm);
 }
 
-// Cerrar el formulario y limpiar campos al presionar la X
 if (closeFormBtn) {
     closeFormBtn.addEventListener('click', () => {
         addEquipoContainer.classList.add('hidden');
         addEquipoForm.reset();
-        // Resetear el formulario al modo "agregar"
         if (addEquipoForm.dataset.editingIndex) {
             delete addEquipoForm.dataset.editingIndex;
             addEquipoForm.querySelector('button[type="submit"]').textContent = "Agregar equipo";
@@ -650,7 +617,6 @@ if (closeFormBtn) {
     });
 }
 
-// Filtro de favoritos: mostrar solo favoritos si está activado
 if (showFavoritesOnlyCheckbox) {
     showFavoritesOnlyCheckbox.addEventListener('change', () => {
         currentPage = 1;
@@ -658,25 +624,11 @@ if (showFavoritesOnlyCheckbox) {
     });
 }
 
-// Limpiar favoritos que ya no existen
-function cleanFavoriteEquipos() {
-    const validNames = new Set(equiposData.map(e => e.nombre));
-    for (const name of favoriteEquipoIds) {
-        if (!validNames.has(name)) {
-            favoriteEquipoIds.delete(name);
-        }
-    }
-    saveFavoriteEquipos();
-}
-
-// Inicialización al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
     equiposPerPage = parseInt(equiposPerPageSelect.value) || 3;
     displayEquipos();
-    updateGlobalActionsVisibility();
 });
 
-// Permite cerrar el modal de detalles con la tecla ESC
 document.addEventListener('keydown', (e) => {
     if (e.key === "Escape") {
         const detailModal = document.getElementById('equipo-detail-modal');
@@ -690,18 +642,6 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Limpiar selección de equipos si se eliminan
-function cleanSelectedEquipos() {
-    const validNames = new Set(equiposData.map(e => e.nombre));
-    for (const name of selectedEquipoIds) {
-        if (!validNames.has(name)) {
-            selectedEquipoIds.delete(name);
-        }
-    }
-    saveSelectedEquipos();
-}
-
-// Inicializar el botón de limpiar búsqueda
 if (clearSearchBtn) {
     clearSearchBtn.addEventListener('click', () => {
         searchInput.value = '';
@@ -711,18 +651,11 @@ if (clearSearchBtn) {
     });
 }
 
-// Mostrar botón de limpiar búsqueda solo si hay texto
 if (searchInput) {
     searchInput.addEventListener('input', () => {
         clearSearchBtn.style.display = searchInput.value ? '' : 'none';
     });
 }
-
-/**
- * ============================
- * FIN DEL SCRIPT
- * ============================
- */
 
 /**
  * ============================
@@ -751,6 +684,8 @@ function setupCardEventListeners(card, equipo) {
             selectedEquipoIds.add(equipoNombre);
             card.classList.add('selected');
         }
+        
+
         updateSelectedCount();
         saveSelectedEquipos();
     });
@@ -763,10 +698,10 @@ function setupCardEventListeners(card, equipo) {
             event.stopPropagation();
             contactSent = !contactSent;
             if (contactSent) {
-                contactBtn.textContent = "Contacto Enviado ✅";
+                contactBtn.innerHTML = `<span aria-label="Enviado" role="img">✅</span>`;
                 contactBtn.classList.add('sent');
             } else {
-                contactBtn.textContent = "Contactar";
+                contactBtn.innerHTML = `<span aria-label="Contactar" role="img">✉️</span>`;
                 contactBtn.classList.remove('sent');
             }
         });
@@ -826,8 +761,6 @@ function setupCardEventListeners(card, equipo) {
 
             addEquipoForm.dataset.editingIndex = editingIndex;
             addEquipoForm.querySelector('button[type="submit"]').textContent = "Guardar cambios";
-
-            // Scroll hacia el formulario
             addEquipoContainer.scrollIntoView({ behavior: 'smooth' });
         });
     }
@@ -847,18 +780,13 @@ function setupCardEventListeners(card, equipo) {
                     if (idx !== -1) {
                         selectedEquipoIds.delete(equipo.nombre);
                         favoriteEquipoIds.delete(equipo.nombre);
-                        card.classList.add('equipo-card--exit');
-                        setTimeout(() => {
-                            equiposData.splice(idx, 1);
-                            saveEquiposToLocalStorage();
-                            saveFavoriteEquipos();
-                            showToast(`Equipo ${equipo.nombre} eliminado correctamente.`, "success");
-                            currentPage = 1;
-                            displayEquipos();
-                            cleanSelectedEquipos();
-                            cleanFavoriteEquipos();
-                            updateSelectedCount();
-                        }, 300);
+                        equiposData.splice(idx, 1);
+                        saveEquiposToLocalStorage();
+                        saveFavoriteEquipos();
+                        showToast(`Equipo ${equipo.nombre} eliminado correctamente.`, "success");
+                        currentPage = 1;
+                        displayEquipos();
+                        updateSelectedCount();
                     }
                 }
             });
@@ -866,7 +794,6 @@ function setupCardEventListeners(card, equipo) {
     }
 }
 
-// Función para mostrar/ocultar el formulario
 function toggleAddEquipoForm() {
     addEquipoContainer.classList.toggle('hidden');
     if (!addEquipoContainer.classList.contains('hidden')) {

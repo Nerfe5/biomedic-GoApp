@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Botón de cambio de tema (modo oscuro/claro) -->
+    <!-- Botón de cambio de tema -->
     <button id="theme-toggle" class="theme-toggle-btn" title="Cambiar tema">🌙</button>
 
     <!-- Título principal -->
@@ -16,7 +16,7 @@
         <p>Gestión y búsqueda de equipos biomédicos</p>
     </div>
 
-    <!-- Sección de búsqueda y filtros -->
+    <!-- Barra de búsqueda -->
     <div class="search-bar-wrapper">
         <div class="search-container">
             <input type="text" id="search-input" placeholder="Buscar equipo..." />
@@ -30,6 +30,8 @@
         </span>
     </div>
 
+    <div id="equipos-count" class="equipos-count"></div>
+
     <!-- Configuración de paginación -->
     <div class="pagination-settings">
         Mostrar:
@@ -40,7 +42,15 @@
         </select> equipos por página
     </div>
 
-    <!-- Contenedor Global de Acciones de Equipo -->
+     <!-- Filtro de favoritos -->
+    <div class="favorites-filter-container">
+        <label>
+            <input type="checkbox" id="show-favorites-only" />
+            Mostrar solo favoritos
+        </label>
+    </div>
+
+    <!-- Acciones globales -->
     <div id="global-equipo-actions" class="global-actions-container hidden">
         <button id="export-csv-btn" class="action-btn">Exportar CSV</button>
         <button id="toggle-add-form" class="action-btn toggle-form-btn">
@@ -50,7 +60,7 @@
         <input type="file" id="import-file-input" accept=".csv, .json" style="display: none;">
     </div>
 
-    <!-- Contenedor para el formulario de agregar equipo -->
+    <!-- Formulario para agregar/editar equipo -->
     <div class="add-equipo-container hidden">
         <form id="add-equipo-form">
             <div class="form-header">
@@ -74,7 +84,7 @@
     <div id="loading-message" class="hidden">Cargando equipos...</div>
     <div id="no-results-message" class="hidden">No se encontraron equipos.</div>
     <div class="count-display" id="selected-equipos-count">Equipos seleccionados: 0</div>
-    <div id="equipos-count" class="equipos-count"></div>
+    
 
     <!-- Controles de paginación -->
     <div class="pagination-container">
@@ -86,15 +96,8 @@
     <!-- Contenedor de notificaciones -->
     <div id="toast-container"></div>
 
-    <!-- Filtro de favoritos -->
-    <div class="favorites-filter-container">
-        <label>
-            <input type="checkbox" id="show-favorites-only" />
-            Mostrar solo favoritos
-        </label>
-    </div>
+   
 
-    <!-- Modales -->
     <!-- Modal de confirmación -->
     <div id="confirm-modal" class="modal hidden">
         <div class="modal-content">
@@ -109,12 +112,11 @@
     <!-- Modal de detalles de equipo -->
     <div id="equipo-detail-modal" class="modal hidden">
         <div class="modal-content">
-            <button id="close-detail-modal" class="close-modal-btn" title="Cerrar">×</button>
+            <button id="close-detail-modal" class="close-detail-modal" title="Cerrar">×</button>
             <div id="equipo-detail-content"></div>
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="script.js"></script>
 </body>
 </html>
