@@ -309,15 +309,29 @@ body {
     box-shadow: 0 4px 16px rgba(40,167,69,0.18);
 }
 
+.equipo-image-container {
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f4f6fa;
+    border-radius: 16px;
+    margin-bottom: 18px;
+    overflow: hidden;
+}
+
 .equipo-image {
-    width: 110px;
-    height: 110px;
-    border-radius: 10px;
-    object-fit: cover;
-    margin-bottom: 14px;
-    border: 2.5px solid var(--color-primary);
-    background: #f0f0f0;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    height: 100%;
+    width: auto; /* O simplemente omite width */
+    max-width: 100%;
+    object-fit: contain;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    transition: box-shadow 0.18s, border 0.18s;
+    display: block;
+    margin: 0 auto;
 }
 
 .equipo-nombre {
@@ -511,7 +525,7 @@ body {
 }
 
 /* ===========================
-   MODAL DE DETALLE DE EQUIPO
+   MODAL DE DETALLE DE EQUIPO (estilo profesional y transparente)
    =========================== */
 .modal {
     position: fixed;
@@ -521,15 +535,18 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 99999;
+    /* Efecto de desenfoque en el fondo */
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 .modal.hidden {
     display: none;
 }
 .modal-content {
-    background: var(--color-card);
-    border-radius: 12px;
+    background: rgba(255,255,255,0.82); /* Fondo blanco semitransparente */
+    border-radius: 16px;
     padding: 32px 28px 22px 28px;
-    box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.22);
     text-align: center;
     min-width: 280px;
     max-width: 90vw;
@@ -539,53 +556,12 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-
-/* Confirmación: mensaje y acciones */
-#confirm-modal-message {
-    font-size: 1.15em;
-    color: var(--color-text);
-    margin-bottom: 22px;
-    font-weight: 500;
-    text-align: center;
-    letter-spacing: 0.2px;
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: center;
-    gap: 18px;
-    margin-top: 8px;
-}
-
-.modal-btn {
-    padding: 8px 22px;
-    border-radius: 7px;
-    border: none;
-    font-size: 1em;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
-    box-shadow: 0 1px 4px var(--color-shadow);
-}
-
-.modal-btn-yes {
-    background: var(--color-accent);
-    color: #fff;
-}
-.modal-btn-yes:hover {
-    background: #218838;
-}
-
-.modal-btn-no {
-    background: var(--color-danger);
-    color: #fff;
-}
-.modal-btn-no:hover {
-    background: #c82333;
+    /* Efecto de desenfoque interno */
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
 }
 body.dark-mode .modal-content {
-    background: var(--color-card);
+    background: rgba(35,39,42,0.88);
     color: var(--color-text);
 }
 .close-detail-modal {
@@ -706,6 +682,241 @@ body.dark-mode .modal-content {
     10% { opacity: 0.95; transform: translateY(0);}
     90% { opacity: 0.95; transform: translateY(0);}
     100% { opacity: 0; transform: translateY(-30px);}
+}
+
+/* ===========================
+   MODAL DE CONFIRMACIÓN
+   =========================== */
+#confirm-modal.modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.38);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100000;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+#confirm-modal.modal.hidden {
+    display: none;
+}
+#confirm-modal .modal-content {
+    background: rgba(255,255,255,0.92);
+    border-radius: 18px;
+    padding: 32px 32px 24px 32px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.22);
+    min-width: 300px;
+    max-width: 95vw;
+    color: var(--color-text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background 0.2s, color 0.2s;
+    position: relative;
+    text-align: center;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+body.dark-mode #confirm-modal .modal-content {
+    background: rgba(35,39,42,0.95);
+    color: var(--color-text);
+}
+#confirm-modal-message {
+    font-size: 1.18em;
+    color: var(--color-text);
+    margin-bottom: 22px;
+    font-weight: 500;
+    text-align: center;
+    letter-spacing: 0.2px;
+}
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 8px;
+}
+.modal-btn {
+    padding: 8px 22px;
+    border-radius: 7px;
+    border: none;
+    font-size: 1em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    box-shadow: 0 1px 4px var(--color-shadow);
+}
+.modal-btn-yes {
+    background: var(--color-accent);
+    color: #fff;
+}
+.modal-btn-yes:hover {
+    background: #218838;
+}
+.modal-btn-no {
+    background: var(--color-danger);
+    color: #fff;
+}
+.modal-btn-no:hover {
+    background: #c82333;
+}
+
+/* ===========================
+   MODAL DE CONTACTO/REPORTE
+   =========================== */
+.contact-modal-content {
+    max-width: 700px;
+    width: 98vw;
+    padding: 36px 32px 28px 32px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.22);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    position: relative;
+    border: 1.5px solid #e3e7ee;
+}
+
+body.dark-mode .contact-modal-content {
+    background: #23272a;
+    border-color: #353b41;
+}
+
+.contact-modal-content .modal-title {
+    text-align: center;
+    margin-bottom: 22px;
+    font-size: 1.35em;
+    color: #1a2330;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+#contact-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 28px;
+    align-items: end;
+}
+
+#contact-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#contact-form .form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+#contact-form label {
+    font-weight: 500;
+    color: #2d3a4a;
+    font-size: 1em;
+    margin-bottom: 2px;
+    letter-spacing: 0.1px;
+}
+
+body.dark-mode #contact-form label {
+    color: #e0e6ef;
+}
+
+#contact-form input,
+#contact-form textarea {
+    padding: 10px 13px;
+    border: 1.7px solid #bfc9d9;
+    border-radius: 7px;
+    font-size: 1em;
+    background: #f8fafc;
+    color: #1a2330;
+    transition: border 0.2s, box-shadow 0.2s;
+    outline: none;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+#contact-form input:focus,
+#contact-form textarea:focus {
+    border-color: #007bff;
+    background: #fff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.10);
+}
+
+body.dark-mode #contact-form input,
+body.dark-mode #contact-form textarea {
+    background: #23272a;
+    color: #e0e6ef;
+    border-color: #3a4250;
+}
+
+body.dark-mode #contact-form input:focus,
+body.dark-mode #contact-form textarea:focus {
+    border-color: #4ea1ff;
+    background: #23272a;
+    box-shadow: 0 0 0 2px rgba(78,161,255,0.13);
+}
+
+#contact-form textarea {
+    resize: vertical;
+    min-height: 38px;
+    max-height: 120px;
+}
+
+#contact-form button[type="submit"] {
+    grid-column: 1 / -1;
+    margin: 18px auto 0 auto;
+    padding: 8px 32px;
+    font-size: 1em;
+    font-weight: 600;
+    border-radius: 7px;
+    background: linear-gradient(90deg, #007bff 60%, #0056b3 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,123,255,0.07);
+    cursor: pointer;
+    transition: background 0.18s, box-shadow 0.18s;
+    display: block;
+    min-width: 120px;
+    max-width: 220px;
+}
+
+#contact-form button[type="submit"]:hover {
+    background: linear-gradient(90deg, #0056b3 60%, #007bff 100%);
+    box-shadow: 0 4px 16px rgba(0,123,255,0.13);
+}
+
+.close-detail-modal {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    background: none;
+    border: none;
+    font-size: 1.7em;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.18s;
+    z-index: 2;
+}
+
+.close-detail-modal:hover {
+    color: #007bff;
+}
+
+@media (max-width: 700px) {
+    .contact-modal-content {
+        max-width: 99vw;
+        padding: 18px 6vw 18px 6vw;
+    }
+    #contact-form {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    #contact-form button[type="submit"] {
+        margin: 14px auto 0 auto;
+        width: 90%;
+        min-width: 0;
+        max-width: 100%;
+        padding: 10px 0;
+    }
 }
 
 /* ===========================

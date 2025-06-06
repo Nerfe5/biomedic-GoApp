@@ -67,6 +67,9 @@ const toggleFormBtn = document.getElementById('toggle-add-form');
 const closeFormBtn = document.getElementById('close-add-form');
 const addEquipoContainer = document.querySelector('.add-equipo-container');
 
+const contactModal = document.getElementById('contact-modal');
+const contactForm = document.getElementById('contact-form');
+const closeContactModalBtn = document.getElementById('close-contact-modal');
 /**
  * ============================
  * FUNCIONES DE PAGINACIÓN
@@ -162,24 +165,26 @@ function createEquipoCard(equipo) {
     // Estructura de la tarjeta: imagen, nombre, marca-modelo-numserie en una línea, descripción y botones
     card.innerHTML = `
         <button class="favorite-btn" title="Marcar como favorito">
-            ${favoriteEquipoIds.has(equipo.nombre) ? '★' : '☆'}
-        </button>
+        ${favoriteEquipoIds.has(equipo.nombre) ? '★' : '☆'}
+    </button>
+    <div class="equipo-image-container">
         <img class="equipo-image" src="${equipo.foto}" alt="Foto de equipo ${equipo.nombre}">
-        <h2 class="equipo-nombre">${highlightText(equipo.nombre, searchTerm)}</h2>
-        <div class="equipo-info-line">
-            <span class="equipo-marca-modelo-numserie">
-                ${highlightText(equipo.marca, searchTerm)} | 
-                ${highlightText(equipo.modelo, searchTerm)} | 
-                ${highlightText(equipo.numserie, searchTerm)}
-            </span>
-        </div>
-        <p class="equipo-descripcion">${highlightText(equipo.descripcion, searchTerm)}</p>
-        <div class="equipo-acciones">
-            <button class="equipo-button" title="Contactar"><span aria-label="Contactar" role="img">✉️</span></button>
-            <button class="detail-equipo-btn" title="Ver más"><span aria-label="Ver más" role="img">🔍</span></button>
-            <button class="edit-equipo-btn" title="Editar"><span aria-label="Editar" role="img">✏️</span></button>
-            <button class="delete-equipo-btn" title="Eliminar"><span aria-label="Eliminar" role="img">🗑️</span></button>
-        </div>
+    </div>
+    <h2 class="equipo-nombre">${highlightText(equipo.nombre, searchTerm)}</h2>
+    <div class="equipo-info-line">
+        <span class="equipo-marca-modelo-numserie">
+            ${highlightText(equipo.marca, searchTerm)} | 
+            ${highlightText(equipo.modelo, searchTerm)} | 
+            ${highlightText(equipo.numserie, searchTerm)}
+        </span>
+    </div>
+    <p class="equipo-descripcion">${highlightText(equipo.descripcion, searchTerm)}</p>
+    <div class="equipo-acciones">
+        <button class="equipo-button" title="Contactar"><span aria-label="Contactar" role="img">✉️</span></button>
+        <button class="detail-equipo-btn" title="Ver más"><span aria-label="Ver más" role="img">🔍</span></button>
+        <button class="edit-equipo-btn" title="Editar"><span aria-label="Editar" role="img">✏️</span></button>
+        <button class="delete-equipo-btn" title="Eliminar"><span aria-label="Eliminar" role="img">🗑️</span></button>
+    </div>
     `;
 
     // Asigna los eventos a la tarjeta y sus botones
@@ -664,48 +669,32 @@ if (searchInput) {
  */
 
 function setupCardEventListeners(card, equipo) {
-    // Evento de selección de tarjeta
-    card.addEventListener('click', (event) => {
-        const clickedElement = event.target;
-        // Evita seleccionar si se hace clic en un botón o enlace
-        if (clickedElement.classList.contains('equipo-button') || 
-            clickedElement.closest('a') ||
-            clickedElement.classList.contains('edit-equipo-btn') ||
-            clickedElement.classList.contains('delete-equipo-btn') ||
-            clickedElement.classList.contains('favorite-btn') ||
-            clickedElement.classList.contains('detail-equipo-btn')) {
-            return;
-        }
-        const equipoNombre = card.dataset.equipoNombre;
-        if (selectedEquipoIds.has(equipoNombre)) {
-            selectedEquipoIds.delete(equipoNombre);
-            card.classList.remove('selected');
-        } else {
-            selectedEquipoIds.add(equipoNombre);
-            card.classList.add('selected');
-        }
-        
-
-        updateSelectedCount();
-        saveSelectedEquipos();
-    });
-
-    // Botón de contactar
-    const contactBtn = card.querySelector('.equipo-button');
-    if (contactBtn) {
-        let contactSent = false;
-        contactBtn.addEventListener('click', (event) => {
-            event.stopPropagation();
-            contactSent = !contactSent;
-            if (contactSent) {
-                contactBtn.innerHTML = `<span aria-label="Enviado" role="img">✅</span>`;
-                contactBtn.classList.add('sent');
-            } else {
-                contactBtn.innerHTML = `<span aria-label="Contactar" role="img">✉️</span>`;
-                contactBtn.classList.remove('sent');
-            }
-        });
+ // Evento de selección de tarjeta
+card.addEventListener('click', (event) => {
+    const clickedElement = event.target;
+    // Evita seleccionar si se hace clic en un botón de acciones dentro de la tarjeta
+    if (
+        clickedElement.closest('.equipo-button') ||
+        clickedElement.closest('.edit-equipo-btn') ||
+        clickedElement.closest('.delete-equipo-btn') ||
+        clickedElement.closest('.favorite-btn') ||
+        clickedElement.closest('.detail-equipo-btn') ||
+        clickedElement.closest('a')
+    ) {
+        return;
     }
+    const equipoNombre = card.dataset.equipoNombre;
+    if (selectedEquipoIds.has(equipoNombre)) {
+        selectedEquipoIds.delete(equipoNombre);
+        card.classList.remove('selected');
+    } else {
+        selectedEquipoIds.add(equipoNombre);
+        card.classList.add('selected');
+    }
+
+    updateSelectedCount();
+    saveSelectedEquipos();
+});
 
     // Botón Ver más
     const detailBtn = card.querySelector('.detail-equipo-btn');
@@ -801,3 +790,73 @@ function toggleAddEquipoForm() {
     }
 }
 
+// Función para abrir el modal de contacto y rellenar datos
+function openContactModal(equipo) {
+    // Fecha actual en formato YYYY-MM-DD
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const fechaActual = `${yyyy}-${mm}-${dd}`;
+
+    // Rellenar campos automáticos
+    document.getElementById('contact-fecha').value = fechaActual;
+    document.getElementById('contact-equipo').value = equipo.nombre || '';
+    document.getElementById('contact-marca').value = equipo.marca || '';
+    document.getElementById('contact-modelo').value = equipo.modelo || '';
+    document.getElementById('contact-serie').value = equipo.numserie || '';
+
+    // Limpiar campos manuales
+    document.getElementById('contact-ubicacion').value = '';
+    document.getElementById('contact-falla').value = '';
+    document.getElementById('contact-proveedor').value = '';
+    document.getElementById('contact-correo').value = '';
+    document.getElementById('contact-nombre').value = '';
+    document.getElementById('contact-puesto').value = '';
+    document.getElementById('contact-matricula').value = '';
+
+    // Mostrar modal
+    contactModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // Evita scroll de fondo
+}
+
+// Cerrar modal
+closeContactModalBtn.addEventListener('click', () => {
+    contactModal.classList.add('hidden');
+    document.body.style.overflow = '';
+});
+
+// Cerrar modal al hacer click fuera del contenido
+contactModal.addEventListener('click', (e) => {
+    if (e.target === contactModal) {
+        contactModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+});
+
+// Evento para el botón "Contactar" de cada tarjeta
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.equipo-button');
+    if (btn) {
+        e.stopPropagation();
+        // Encuentra la tarjeta y extrae los datos del equipo
+        const card = btn.closest('.equipo-card');
+        if (!card) return;
+        const equipo = {
+            nombre: card.querySelector('.equipo-nombre')?.textContent || '',
+            marca: card.querySelector('.equipo-marca-modelo-numserie')?.textContent.split('|')[0]?.trim() || '',
+            modelo: card.querySelector('.equipo-marca-modelo-numserie')?.textContent.split('|')[1]?.trim() || '',
+            numserie: card.querySelector('.equipo-marca-modelo-numserie')?.textContent.split('|')[2]?.trim() || ''
+        };
+        openContactModal(equipo);
+    }
+});
+
+// Puedes agregar aquí el manejo del envío del formulario si lo necesitas
+contactForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    // Aquí puedes manejar el envío, impresión o guardado del reporte
+    alert('¡Reporte enviado correctamente!');
+    contactModal.classList.add('hidden');
+    document.body.style.overflow = '';
+});
