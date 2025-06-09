@@ -124,54 +124,76 @@
     <button class="close-detail-modal" id="close-contact-modal" title="Cerrar">×</button>
     <h2 class="modal-title">Reporte de Avería de Equipo Médico</h2>
     <form id="contact-form">
-      <div class="form-group">
-        <label for="contact-fecha">Fecha:</label>
-        <input type="date" id="contact-fecha" name="fecha" required>
+      <div class="form-section">
+        <h3 class="form-section-title">Datos del equipo</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="contact-fecha">Fecha:</label>
+            <input type="date" id="contact-fecha" name="fecha" required>
+          </div>
+          <div class="form-group">
+            <label for="contact-equipo">Equipo:</label>
+            <input type="text" id="contact-equipo" name="equipo" readonly>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="contact-marca">Marca:</label>
+            <input type="text" id="contact-marca" name="marca" readonly>
+          </div>
+          <div class="form-group">
+            <label for="contact-modelo">Modelo:</label>
+            <input type="text" id="contact-modelo" name="modelo" readonly>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="contact-serie">Serie:</label>
+            <input type="text" id="contact-serie" name="serie" readonly>
+          </div>
+          <div class="form-group">
+            <label for="contact-ubicacion">Ubicación:</label>
+            <input type="text" id="contact-ubicacion" name="ubicacion" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="contact-proveedor">Proveedor:</label>
+            <input type="text" id="contact-proveedor" name="proveedor">
+          </div>
+          <div class="form-group">
+            <label for="contact-correo">Se envía correo a:</label>
+            <input type="email" id="contact-correo" name="correo">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="contact-falla">Descripción de la falla o avería:</label>
+            <textarea id="contact-falla" name="falla" rows="2" required></textarea>
+          </div>
+        </div>
       </div>
-      <div class="form-group">
-        <label for="contact-equipo">Equipo:</label>
-        <input type="text" id="contact-equipo" name="equipo" readonly>
+
+      <div class="form-section">
+        <h3 class="form-section-title">Datos del usuario</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="contact-nombre">Nombre:</label>
+            <input type="text" id="contact-nombre" name="nombre" required>
+          </div>
+          <div class="form-group">
+            <label for="contact-puesto">Puesto:</label>
+            <input type="text" id="contact-puesto" name="puesto">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="contact-matricula">Matrícula:</label>
+            <input type="text" id="contact-matricula" name="matricula">
+          </div>
+        </div>
       </div>
-      <div class="form-group">
-        <label for="contact-marca">Marca:</label>
-        <input type="text" id="contact-marca" name="marca" readonly>
-      </div>
-      <div class="form-group">
-        <label for="contact-modelo">Modelo:</label>
-        <input type="text" id="contact-modelo" name="modelo" readonly>
-      </div>
-      <div class="form-group">
-        <label for="contact-serie">Serie:</label>
-        <input type="text" id="contact-serie" name="serie" readonly>
-      </div>
-      <div class="form-group">
-        <label for="contact-proveedor">Proveedor:</label>
-        <input type="text" id="contact-proveedor" name="proveedor">
-      </div>
-      <div class="form-group">
-        <label for="contact-ubicacion">Ubicación:</label>
-        <input type="text" id="contact-ubicacion" name="ubicacion" required>
-      </div>
-      <div class="form-group">
-        <label for="contact-correo">Se envía correo a:</label>
-        <input type="email" id="contact-correo" name="correo">
-      </div>
-      <div class="form-group">
-        <label for="contact-nombre">Nombre:</label>
-        <input type="text" id="contact-nombre" name="nombre" required>
-      </div>
-      <div class="form-group">
-        <label for="contact-puesto">Puesto:</label>
-        <input type="text" id="contact-puesto" name="puesto">
-      </div>
-      <div class="form-group">
-        <label for="contact-matricula">Matrícula:</label>
-        <input type="text" id="contact-matricula" name="matricula">
-      </div>
-      <div class="form-group full-width">
-        <label for="contact-falla">Falla:</label>
-        <textarea id="contact-falla" name="falla" rows="2" required></textarea>
-      </div>
+
       <button type="submit" class="action-btn">Enviar reporte</button>
     </form>
   </div>
