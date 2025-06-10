@@ -853,10 +853,44 @@ document.addEventListener('click', function(e) {
 });
 
 // Puedes agregar aquí el manejo del envío del formulario si lo necesitas
-contactForm.addEventListener('submit', function(e) {
+contactForm.addEventListener('submit', async function(e) {
     e.preventDefault();
-    // Aquí puedes manejar el envío, impresión o guardado del reporte
-    alert('¡Reporte enviado correctamente!');
-    contactModal.classList.add('hidden');
-    document.body.style.overflow = '';
+
+    // Recolecta los datos del formulario
+    const data = {
+        fecha: document.getElementById('contact-fecha').value,
+        equipo: document.getElementById('contact-equipo').value,
+        marca: document.getElementById('contact-marca').value,
+        modelo: document.getElementById('contact-modelo').value,
+        serie: document.getElementById('contact-serie').value,
+        ubicacion: document.getElementById('contact-ubicacion').value,
+        proveedor: document.getElementById('contact-proveedor').value,
+        correo: document.getElementById('contact-correo').value,
+        falla: document.getElementById('contact-falla').value,
+        nombre: document.getElementById('contact-nombre').value,
+        puesto: document.getElementById('contact-puesto').value,
+        matricula: document.getElementById('contact-matricula').value
+    };
+
+    // Envía los datos al backend
+    try {
+        const response = await fetch('http://localhost:3001/api/reporte', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if (result.ok) {
+            alert('¡Reporte enviado correctamente!');
+            contactForm.reset();
+            // Aquí puedes cerrar el modal si lo deseas
+        } else {
+            alert('Error al enviar el reporte: ' + result.message);
+        }
+    } catch (err) {
+        alert('Error de conexión con el servidor: ' + err.message);
+    }
 });
