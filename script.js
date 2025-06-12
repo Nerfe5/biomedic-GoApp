@@ -122,6 +122,33 @@ function updatePaginationUI(equipos = equiposData) {
  * ============================
  */
 
+// Función para verificar si las descripciones están truncadas y mostrar indicadores visuales
+function checkTruncatedDescriptions() {
+    const descripcionContainers = document.querySelectorAll('.equipo-descripcion-container');
+    descripcionContainers.forEach(container => {
+        const descripcion = container.querySelector('.equipo-descripcion');
+        if (descripcion) {
+            // Verificar si el contenido es más grande que el contenedor
+            if (descripcion.scrollHeight > descripcion.clientHeight) {
+                // La descripción está truncada, mostrar indicador
+                if (!container.classList.contains('has-more-content')) {
+                    container.classList.add('has-more-content');
+                    container.querySelector('.equipo-descripcion').setAttribute('title', 'Scroll para ver más contenido');
+                    
+                    // Mostrar gradiente de fade-out en el fondo
+                    const indicatorStyle = document.createElement('style');
+                    indicatorStyle.textContent = `
+                        .has-more-content::after {
+                            display: block !important;
+                        }
+                    `;
+                    document.head.appendChild(indicatorStyle);
+                }
+            }
+        }
+    });
+}
+
 function renderEquipoCards(equiposToRender) {
     if (renderTimeoutId) clearTimeout(renderTimeoutId);
     equiposContainer.innerHTML = '';
@@ -136,6 +163,9 @@ function renderEquipoCards(equiposToRender) {
                 const newCard = createEquipoCard(equipo);
                 equiposContainer.appendChild(newCard);
             });
+            
+            // Verificar descripciones truncadas después de renderizar
+            setTimeout(checkTruncatedDescriptions, 100);
         }
         updateSelectedCount();
         loadingMessage.classList.add('hidden');
@@ -173,15 +203,18 @@ function createEquipoCard(equipo) {
     <h2 class="equipo-nombre">${highlightText(equipo.nombre, searchTerm)}</h2>
     <div class="equipo-info-line">
         <span class="equipo-marca-modelo-numserie">
-            ${highlightText(equipo.marca, searchTerm)} | 
-            ${highlightText(equipo.modelo, searchTerm)} | 
-            ${highlightText(equipo.numserie, searchTerm)}
+            <strong>Marca:</strong> ${highlightText(equipo.marca, searchTerm)}<br>
+            <strong>Modelo:</strong> ${highlightText(equipo.modelo, searchTerm)}<br>
+            <strong>Serie:</strong> ${highlightText(equipo.numserie, searchTerm)}
         </span>
     </div>
-    <p class="equipo-descripcion">${highlightText(equipo.descripcion, searchTerm)}</p>
+    <div class="equipo-descripcion-container">
+        <p class="equipo-descripcion" title="${equipo.descripcion}">${highlightText(equipo.descripcion, searchTerm)}</p>
+    </div>
     <div class="equipo-acciones">
         <button class="equipo-button" title="Contactar"><span aria-label="Contactar" role="img">✉️</span></button>
         <button class="detail-equipo-btn" title="Ver más"><span aria-label="Ver más" role="img">🔍</span></button>
+        <button class="duplicate-equipo-btn" title="Duplicar"><span aria-label="Duplicar" role="img">📋</span></button>
         <button class="edit-equipo-btn" title="Editar"><span aria-label="Editar" role="img">✏️</span></button>
         <button class="delete-equipo-btn" title="Eliminar"><span aria-label="Eliminar" role="img">🗑️</span></button>
     </div>
@@ -212,9 +245,13 @@ function displayEquipos() {
         currentFilteredEquipos = baseEquipos.filter(equipo => {
             const nombreLower = equipo.nombre.toLowerCase();
             const marcaLower = equipo.marca.toLowerCase();
+            const modeloLower = equipo.modelo.toLowerCase();
+            const numSerieLower = equipo.numserie.toLowerCase();
             const descripcionLower = equipo.descripcion.toLowerCase();
             return nombreLower.includes(searchTerm) || 
                    marcaLower.includes(searchTerm) || 
+                   modeloLower.includes(searchTerm) || 
+                   numSerieLower.includes(searchTerm) || 
                    descripcionLower.includes(searchTerm);
         });
     } else {
@@ -272,11 +309,19 @@ function saveEquiposToLocalStorage() {
 
 function updateGlobalActionsVisibility() {
     const globalActionsContainer = document.getElementById('global-equipo-actions');
+    const exportCsvBtn = document.getElementById('export-csv-btn');
+    
     if (globalActionsContainer) {
-        if (selectedEquipoIds.size > 0) {
-            globalActionsContainer.classList.remove('hidden');
-        } else {
-            globalActionsContainer.classList.add('hidden');
+        // Siempre mostramos el contenedor de acciones (para poder agregar o importar)
+        globalActionsContainer.classList.remove('hidden');
+        
+        // Solo mostramos el botón de exportar si hay equipos seleccionados
+        if (exportCsvBtn) {
+            if (selectedEquipoIds.size > 0) {
+                exportCsvBtn.style.display = '';
+            } else {
+                exportCsvBtn.style.display = 'none';
+            }
         }
     }
 }
@@ -416,10 +461,21 @@ function showEquipoDetailModal(equipo) {
     content.innerHTML = `
         <button class="close-detail-modal" id="close-detail-modal" title="Cerrar">×</button>
         <div class="equipo-detail-modal-content">
-            <img class="equipo-detail-image" src="${equipo.foto}" alt="Foto de equipo ${equipo.nombre}">
-            <h2 class="equipo-detail-nombre">${equipo.nombre}</h2>
-            <h3 class="equipo-detail-marca-modelo">${equipo.marca} ${equipo.modelo}</h3>
-            <p class="equipo-detail-descripcion">${equipo.descripcion}</p>
+            <div class="equipo-detail-left">
+                <img class="equipo-detail-image" src="${equipo.foto}" alt="Foto de equipo ${equipo.nombre}">
+            </div>
+            <div class="equipo-detail-right">
+                <h2 class="equipo-detail-nombre">${equipo.nombre}</h2>
+                <div class="equipo-detail-info">
+                    <p><strong>Marca:</strong> ${equipo.marca}</p>
+                    <p><strong>Modelo:</strong> ${equipo.modelo}</p>
+                    <p><strong>Número de Serie:</strong> ${equipo.numserie}</p>
+                </div>
+                <div class="equipo-detail-descripcion-container">
+                    <h3>Descripción:</h3>
+                    <div class="equipo-detail-descripcion">${equipo.descripcion}</div>
+                </div>
+            </div>
         </div>
     `;
     modal.classList.remove('hidden');
@@ -468,11 +524,10 @@ if (addEquipoForm) {
         if (editingIndex && editingIndex !== "-1") {
             const existe = equiposData.some((e, idx) =>
                 idx != editingIndex &&
-                e.nombre === nombre &&
                 e.numserie === numserie
             );
             if (existe) {
-                showToast("Ya existe un equipo con ese nombre y número de serie.", "error");
+                showToast("Ya existe un equipo con ese número de serie.", "error");
                 return;
             }
             equiposData[editingIndex] = newEquipo;
@@ -480,9 +535,9 @@ if (addEquipoForm) {
             addEquipoForm.querySelector('button[type="submit"]').textContent = "Agregar equipo";
             showToast("Equipo editado correctamente.", "success");
         } else {
-            const existe = equiposData.some(e => e.nombre === nombre && e.numserie === numserie);
+            const existe = equiposData.some(e => e.numserie === numserie);
             if (existe) {
-                showToast("Ya existe un equipo con ese nombre y número de serie.", "error");
+                showToast("Ya existe un equipo con ese número de serie.", "error");
                 return;
             }
             equiposData.unshift(newEquipo);
@@ -727,6 +782,33 @@ card.addEventListener('click', (event) => {
         });
     }
 
+    // Botón de duplicar
+    const duplicateBtn = card.querySelector('.duplicate-equipo-btn');
+    if (duplicateBtn) {
+        duplicateBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            addEquipoContainer.classList.remove('hidden');
+            document.getElementById('new-nombre').value = equipo.nombre;
+            document.getElementById('new-marca').value = equipo.marca;
+            document.getElementById('new-modelo').value = equipo.modelo;
+            document.getElementById('new-numserie').value = ""; // Dejamos vacío para que el usuario lo complete
+            document.getElementById('new-foto').value = equipo.foto;
+            document.getElementById('new-descripcion').value = equipo.descripcion;
+            
+            // Aseguramos que no estamos en modo edición
+            delete addEquipoForm.dataset.editingIndex;
+            addEquipoForm.querySelector('button[type="submit"]').textContent = "Agregar equipo";
+            
+            // Mostramos un mensaje para que el usuario sepa qué hacer
+            showToast("Complete el número de serie para el nuevo equipo", "info");
+            
+            // Hacemos foco en el campo de número de serie
+            setTimeout(() => document.getElementById('new-numserie').focus(), 300);
+            
+            addEquipoContainer.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
     // Botón de editar
     const editBtn = card.querySelector('.edit-equipo-btn');
     if (editBtn) {
@@ -842,11 +924,36 @@ document.addEventListener('click', function(e) {
         // Encuentra la tarjeta y extrae los datos del equipo
         const card = btn.closest('.equipo-card');
         if (!card) return;
+        // Extraer datos del equipo de la tarjeta
+        const infoText = card.querySelector('.equipo-marca-modelo-numserie')?.textContent || '';
+        const nombre = card.querySelector('.equipo-nombre')?.textContent || '';
+        
+        // Extraer cada valor usando expresiones regulares
+        let marca = '', modelo = '', numserie = '';
+        
+        // Extraer marca
+        const marcaMatch = infoText.match(/Marca:\s*([^\n]+)/);
+        if (marcaMatch && marcaMatch[1]) {
+            marca = marcaMatch[1].trim();
+        }
+        
+        // Extraer modelo
+        const modeloMatch = infoText.match(/Modelo:\s*([^\n]+)/);
+        if (modeloMatch && modeloMatch[1]) {
+            modelo = modeloMatch[1].trim();
+        }
+        
+        // Extraer número de serie
+        const serieMatch = infoText.match(/Serie:\s*([^\n]+)/);
+        if (serieMatch && serieMatch[1]) {
+            numserie = serieMatch[1].trim();
+        }
+        
         const equipo = {
-            nombre: card.querySelector('.equipo-nombre')?.textContent || '',
-            marca: card.querySelector('.equipo-marca-modelo-numserie')?.textContent.split('|')[0]?.trim() || '',
-            modelo: card.querySelector('.equipo-marca-modelo-numserie')?.textContent.split('|')[1]?.trim() || '',
-            numserie: card.querySelector('.equipo-marca-modelo-numserie')?.textContent.split('|')[2]?.trim() || ''
+            nombre: nombre,
+            marca: marca,
+            modelo: modelo,
+            numserie: numserie
         };
         openContactModal(equipo);
     }
