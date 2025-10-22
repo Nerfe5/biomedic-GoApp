@@ -503,7 +503,7 @@ document.addEventListener('click', function(e) {
  */
 
 if (addEquipoForm) {
-    addEquipoForm.addEventListener('submit', function(e) {
+    addEquipoForm.addEventListener('submit', async function(e) {
         e.preventDefault();
 
         const nombre = document.getElementById('new-nombre').value.trim();
@@ -540,6 +540,33 @@ if (addEquipoForm) {
                 showToast("Ya existe un equipo con ese número de serie.", "error");
                 return;
             }
+            
+            // Enviar al backend
+            try {
+                console.log('Enviando equipo al backend:', newEquipo);
+                const response = await fetch('http://localhost:8080/api/equipos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(newEquipo)
+                });
+                
+                console.log('Respuesta del backend:', response.status, response.statusText);
+                const result = await response.json();
+                console.log('Resultado:', result);
+                
+                if (response.ok) {
+                    showToast("Equipo agregado correctamente en base de datos.", "success");
+                } else {
+                    console.error('Error del backend:', result);
+                    showToast("Error al guardar en backend: " + (result.message || 'error desconocido'), "error");
+                }
+            } catch (err) {
+                console.error('Error de conexión:', err);
+                showToast("Error de conexión con el backend: " + err.message, "error");
+            }
+            
             equiposData.unshift(newEquipo);
             showToast("Equipo agregado correctamente.", "success");
         }
