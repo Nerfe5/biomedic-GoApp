@@ -946,6 +946,7 @@ body.dark-mode #confirm-modal .modal-content {
 .contact-modal-content {
     max-width: 700px;
     width: 98vw;
+    max-height: 92vh;
     padding: 36px 32px 28px 32px;
     background: #fff;
     border-radius: 18px;
@@ -955,6 +956,7 @@ body.dark-mode #confirm-modal .modal-content {
     align-items: stretch;
     position: relative;
     border: 1.5px solid #e3e7ee;
+    overflow-y: auto;
 }
 
 body.dark-mode .contact-modal-content {
