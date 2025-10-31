@@ -1,0 +1,17 @@
+[Unit]
+Description=Biomedic GoApp Frontend
+After=network.target
+
+[Service]
+Type=simple
+User=nerfe5
+WorkingDirectory=/home/nerfe5/projects/biomedic-GoApp
+ExecStart=/home/nerfe5/.nvm/versions/node/v22.20.0/bin/node /home/nerfe5/projects/biomedic-GoApp/server-frontend.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=biomedic-frontend
+
+[Install]
+WantedBy=multi-user.target

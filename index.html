@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biomedic-Go</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="image-selector.css">
 </head>
 <body>
     <!-- Botón de cambio de tema -->
@@ -71,7 +72,16 @@
             <input type="text" id="new-marca" placeholder="Marca" required>
             <input type="text" id="new-modelo" placeholder="Modelo" required>
             <input type="text" id="new-numserie" placeholder="Número de serie" required>
-            <input type="text" id="new-foto" placeholder="Ej: images/svg_optimizado/descarga (10).svg" required>
+            
+            <!-- Selector de imagen -->
+            <div class="image-selector-container">
+                <label for="image-search">Seleccionar imagen del equipo:</label>
+                <input type="text" id="image-search" placeholder="Buscar imagen..." />
+                <div id="image-grid" class="image-grid"></div>
+                <input type="hidden" id="new-foto" required>
+                <div id="selected-image-preview" class="selected-image-preview"></div>
+            </div>
+            
             <textarea id="new-descripcion" placeholder="Descripción" required></textarea>
             <button type="submit">Agregar equipo</button>
         </form>
@@ -202,5 +212,6 @@
 
 
     <script src="script.js"></script>
+    <script src="image-selector.js"></script>
 </body>
 </html>

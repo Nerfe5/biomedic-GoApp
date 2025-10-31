@@ -544,7 +544,7 @@ if (addEquipoForm) {
             // Enviar al backend
             try {
                 console.log('Enviando equipo al backend:', newEquipo);
-                const response = await fetch('http://localhost:8080/api/equipos', {
+                const response = await fetch('http://192.168.0.151:3001/api/equipos', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -1008,7 +1008,7 @@ contactForm.addEventListener('submit', async function(e) {
 
     // Envía los datos al backend
     try {
-        const response = await fetch('http://localhost:3001/api/reporte', {
+        const response = await fetch('http://192.168.0.151:3001/api/reporte', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
